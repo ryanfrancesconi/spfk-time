@@ -1,0 +1,59 @@
+{
+  "pins" : [
+    {
+      "identity" : "aexml",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tadija/AEXML",
+      "state" : {
+        "revision" : "db806756c989760b35108146381535aec231092b",
+        "version" : "4.7.0"
+      }
+    },
+    {
+      "identity" : "checksum",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rnine/Checksum",
+      "state" : {
+        "branch" : "master",
+        "revision" : "9dde3d1d898a5074608a1420791ef0a80c2399f2"
+      }
+    },
+    {
+      "identity" : "otatomics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/orchetect/OTAtomics",
+      "state" : {
+        "branch" : "main",
+        "revision" : "bdf656cda975b28882489114094dd9d92141e5b7"
+      }
+    },
+    {
+      "identity" : "otcore",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/orchetect/OTCore",
+      "state" : {
+        "branch" : "main",
+        "revision" : "396004d5ea461bc0f862e3c80adc0115d6dcc8dc"
+      }
+    },
+    {
+      "identity" : "swift-numerics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-numerics",
+      "state" : {
+        "revision" : "e0ec0f5f3af6f3e4d5e7a19d2af26b481acb6ba8",
+        "version" : "1.0.3"
+      }
+    },
+    {
+      "identity" : "timecodekit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/orchetect/TimecodeKit",
+      "state" : {
+        "revision" : "1014b5723a7eaa93eeb2ea2f52dfd9ea6eb6be0d",
+        "version" : "2.3.3"
+      }
+    }
+  ],
+  "version" : 2
+}

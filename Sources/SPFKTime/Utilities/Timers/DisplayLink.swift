@@ -1,0 +1,148 @@
+import SPFKUtils
+import CoreVideo
+
+/// Analog to the CADisplayLink in iOS.
+
+/*
+ @available(macOS 14.0, *)
+ extension NSWindow {
+     open func displayLink(target: Any, selector: Selector) -> CADisplayLink
+ }
+ */
+public class DisplayLink {
+    public let displaylink: CVDisplayLink
+
+    let source: DispatchSourceUserDataAdd
+
+    public var callback: (() -> Void)?
+
+    public private(set) var running: Bool = false
+
+    public var timeInterval: TimeInterval {
+        let cvTime = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(displaylink)
+        return cvTime.timeValue.double / cvTime.timeScale.double
+    }
+
+    /**
+     Creates a new DisplayLink that gets executed on the given queue
+
+     - Parameters:
+     - queue: Queue which will receive the callback calls
+     */
+    public init(onQueue queue: DispatchQueue = .global(qos: .default)) throws {
+        // Source
+        source = DispatchSource.makeUserDataAddSource(queue: queue)
+
+        // Timer
+        var timerRef: CVDisplayLink?
+
+        // Create timer
+        var err = CVDisplayLinkCreateWithActiveCGDisplays(&timerRef)
+
+        guard let timerRef else {
+            throw NSError(description: "Failed to create timer")
+        }
+
+        // GROSS: Set Output
+        err = CVDisplayLinkSetOutputCallback(
+            timerRef,
+            { (_: CVDisplayLink,
+               _: UnsafePointer<CVTimeStamp>,
+               _: UnsafePointer<CVTimeStamp>,
+               _: CVOptionFlags,
+               _: UnsafeMutablePointer<CVOptionFlags>,
+               sourceUnsafeRaw: UnsafeMutableRawPointer?) -> CVReturn in
+
+                    // Un-opaque the source
+                    if let sourceUnsafeRaw {
+                        // Update the value of the source, thus, triggering a handle call on the timer
+                        let sourceUnmanaged = Unmanaged<DispatchSourceUserDataAdd>.fromOpaque(sourceUnsafeRaw)
+                        sourceUnmanaged.takeUnretainedValue().add(data: 1)
+                    }
+                    return kCVReturnSuccess
+
+            },
+            Unmanaged.passUnretained(source).toOpaque()
+        )
+
+        guard err == kCVReturnSuccess else {
+            throw NSError(description: "Failed to create timer with active display")
+        }
+
+        // Connect to MAIN display
+        err = CVDisplayLinkSetCurrentCGDisplay(timerRef, CGMainDisplayID())
+
+        guard err == kCVReturnSuccess else {
+            throw NSError(description: "Failed to connect to display")
+        }
+
+        displaylink = timerRef
+
+        // Timer setup
+        source.setEventHandler { [weak self] in
+            self?.callback?()
+        }
+    }
+
+    /// Starts the timer
+    public func start() {
+        guard !running else {
+            return
+        }
+
+        let err = CVDisplayLinkStart(displaylink)
+
+        guard err == kCVReturnSuccess else {
+            Log.error("Failed to start timer")
+            return
+        }
+
+        source.resume()
+        running = true
+    }
+
+    /// Suspends the timer, can be restarted aftewards
+    public func suspend() {
+        guard running else {
+            return
+        }
+
+        let err = CVDisplayLinkStop(displaylink)
+
+        guard err == kCVReturnSuccess else {
+            Log.error("Failed to stop timer")
+            return
+        }
+
+        source.suspend()
+        running = false
+    }
+
+    public func cancel() {
+        guard running else {
+            return
+        }
+
+        let err = CVDisplayLinkStop(displaylink)
+
+        guard err == kCVReturnSuccess else {
+            Log.error("Failed to stop timer")
+            return
+        }
+
+        source.cancel()
+        running = false
+    }
+
+    deinit {
+        Log.debug("* { DisplayLink }")
+
+        cancel()
+        /*
+         If the timer is suspended, calling cancel without resuming
+         triggers a crash. This is documented here https://forums.developer.apple.com/thread/15902
+         */
+        start()
+        callback = nil
+    }
+}
