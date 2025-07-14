@@ -2,7 +2,7 @@
 @testable import SPFKTime
 import Testing
 
-class TimeSignatureTests {
+struct TimeSignatureTests {
     @Test func testValidArguments() throws {
         // valid
         #expect((try? TimeSignature(numerator: 2, denominator: 2)) != nil)
