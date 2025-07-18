@@ -7,9 +7,11 @@ import TimecodeKit
 class TimecodeDomainTests {
     lazy var td: TimecodeDomain = {
         var td = TimecodeDomain()
-        _ = td.setFrameRate(to: .fps24,
-                            preservingValuesIfPossible: false,
-                            clampPositionToStartTimecode: true)
+        _ = td.setFrameRate(
+            to: .fps24,
+            preservingValuesIfPossible: false,
+            clampPositionToStartTimecode: true
+        )
 
         // double-check defaults before proceeding
         #expect(td.properties.subFramesBase == .max100SubFrames)
@@ -192,5 +194,26 @@ class TimecodeDomainTests {
         #expect(tc.frameRate == .fps24)
         #expect(tc.subFramesBase == .max100SubFrames)
         #expect(tc.upperLimit == .max24Hours)
+    }
+
+    @Test func testTimecodeSecond() throws {
+        let allCases = TimecodeFrameRate.allCases
+
+        for value in allCases {
+            _ = td.setFrameRate(
+                to: value,
+                preservingValuesIfPossible: false,
+                clampPositionToStartTimecode: true
+            )
+
+            if td.frameRate.isDrop {
+                #expect(td.timecodeSecond < 1)
+
+            } else {
+                #expect(td.timecodeSecond >= 1)
+            }
+
+            Log.debug(td.frameRate, "timecodeSecond: ", td.timecodeSecond)
+        }
     }
 }

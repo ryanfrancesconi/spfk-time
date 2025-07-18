@@ -21,6 +21,9 @@ public struct TimecodeDomain {
 
     public var frameRate: TimecodeFrameRate { properties.frameRate }
 
+    /// The real time duration one second of current timecode
+    public private(set) var timecodeSecond: TimeInterval = 1
+
     // MARK: - Init
 
     init(showSubFrames: Bool = false) {
@@ -34,6 +37,21 @@ public struct TimecodeDomain {
         )
 
         properties.frameRate = Self.defaultFrameRate
+        updateProperties()
+    }
+
+    private mutating func updateProperties() {
+        let hour = Timecode.Components(h: 1)
+
+        guard let oneHourTimecode = try? Timecode(.components(hour), at: frameRate) else { return }
+
+        var sec: TimeInterval = oneHourTimecode.realTimeValue / 3600
+
+        if frameRate.isDrop {
+            sec /= 1.001
+        }
+
+        self.timecodeSecond = sec
     }
 
     // MARK: - Frame Rate
@@ -55,6 +73,7 @@ public struct TimecodeDomain {
         guard newFrameRate != properties.frameRate else { return true }
 
         properties.frameRate = newFrameRate
+        updateProperties()
 
         // update start timecode to reflect new frame rate
         if let startTimecode {
@@ -78,8 +97,10 @@ public struct TimecodeDomain {
         }
 
         // update master timecode to reflect new frame rate
-        if setTimecode(literally: masterTimecode,
-                       clampPositionToStartTimecode: clampPositionToStartTimecode) {
+        if setTimecode(
+            literally: masterTimecode,
+            clampPositionToStartTimecode: clampPositionToStartTimecode
+        ) {
             return true
         }
 
@@ -97,8 +118,10 @@ public struct TimecodeDomain {
     /// This should only be called internally when the timecode being passed in is guaranteed to match the frame rate and base settings of this `TimecodeDomain` instance.
     ///
     /// Internal. Should only be called from a `TransportTime` method.
-    private mutating func setTimecode(literally timecode: Timecode,
-                                      clampPositionToStartTimecode: Bool) -> Bool {
+    private mutating func setTimecode(
+        literally timecode: Timecode,
+        clampPositionToStartTimecode: Bool
+    ) -> Bool {
         var valid = true
         var timecode = timecode
 

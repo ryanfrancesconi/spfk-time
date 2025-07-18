@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "20CC8431-7A4A-40C0-8F7D-9C74634D0D6F",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "SPFKTimeTests",
+        "name" : "SPFKTimeTests"
+      }
+    }
+  ],
+  "version" : 1
+}

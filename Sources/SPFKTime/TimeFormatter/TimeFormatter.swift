@@ -72,9 +72,11 @@ extension TimeFormatter {
                                 preservingValuesIfPossible: Bool = true) {
         // Log.debug("⏰ frameRate to", frameRate.stringValue)
 
-        _ = timecode.setFrameRate(to: frameRate,
-                                  preservingValuesIfPossible: preservingValuesIfPossible,
-                                  clampPositionToStartTimecode: true)
+        _ = timecode.setFrameRate(
+            to: frameRate,
+            preservingValuesIfPossible: preservingValuesIfPossible,
+            clampPositionToStartTimecode: true
+        )
 
         // update current timecode position to reflect elapsed real time
         _ = try? timecode.setTimecode(elapsedTime: realTime.masterSeconds)
@@ -88,7 +90,7 @@ extension TimeFormatter {
     public var primaryString: String {
         switch primaryDomain {
         case .realTime:
-            return realTime.string()
+            return realTime.string(showMilliseconds: true)
 
         case .timecode:
             return timecode.masterTimecode.stringValue()
