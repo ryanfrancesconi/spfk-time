@@ -4,7 +4,7 @@ import SPFKUtils
 /// Information for drawing a musical measure on screen
 public struct VisualMusicalTime: Equatable, Codable {
     public static let tempoRange: ClosedRange<Double> = 1 ... 1024
-    public static let defaultBpm: Double = 120
+    public static let defaultTempo: Double = 120
 
     public static func == (lhs: VisualMusicalTime, rhs: VisualMusicalTime) -> Bool {
         lhs.pixelsPerSecond == rhs.pixelsPerSecond &&
@@ -37,7 +37,7 @@ public struct VisualMusicalTime: Equatable, Codable {
         }
     }
 
-    public var timeSignature: TimeSignature = ._4_4 {
+    public var timeSignature: TimeSignature? {
         didSet {
             update()
         }
@@ -45,20 +45,22 @@ public struct VisualMusicalTime: Equatable, Codable {
 
     public private(set) var visualMeasure: VisualMusicalMeasure?
 
-    public init(pixelsPerSecond: Double = 30, tempo: Double? = nil, timeSignature: TimeSignature = ._4_4) {
-        self.timeSignature = timeSignature
+    public init(
+        pixelsPerSecond: Double = 30,
+        tempo: Double? = nil,
+        timeSignature: TimeSignature? = nil
+    ) {
         self.pixelsPerSecond = pixelsPerSecond
+        self.timeSignature = timeSignature
         self.tempo = tempo
 
         update()
     }
 
     private mutating func update() {
-        guard let tempo, tempo > 0 else {
+        guard let tempo, tempo > 0, let timeSignature else {
             // Log.error("tempo must be set to create the visualMeasure")
-
             visualMeasure = nil
-
             return
         }
 

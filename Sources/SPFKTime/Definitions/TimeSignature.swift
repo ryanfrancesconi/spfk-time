@@ -7,6 +7,10 @@ public struct TimeSignature: Equatable, Codable {
         (try? TimeSignature(numerator: 4, denominator: 4))!
     }()
 
+    public static let _3_4: TimeSignature = {
+        (try? TimeSignature(numerator: 3, denominator: 4))!
+    }()
+    
     public private(set) var numerator: Int
     public private(set) var denominator: Int
 

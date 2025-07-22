@@ -1,7 +1,10 @@
 import Foundation
 
 public struct VisualMusicalMeasure: Equatable, Codable {
-    static let subdivisionsPerBeat: CGFloat = 4
+    private static let subdivisionsPerBeat: CGFloat = 4
+
+    public private(set) var timeSignature: TimeSignature
+    public private(set) var tempo: Double
 
     /// How wide a 1/16 note is in pixels
     public private(set) var pixelsPerSubdivision: CGFloat
@@ -16,6 +19,9 @@ public struct VisualMusicalMeasure: Equatable, Codable {
         guard tempo > 0 else {
             throw NSError(description: "tempo must be greater than zero")
         }
+
+        self.timeSignature = timeSignature
+        self.tempo = tempo
 
         let beatsInSecond: Double = tempo / 60
 
