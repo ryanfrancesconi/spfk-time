@@ -58,8 +58,14 @@ public struct VisualMusicalTime: Equatable, Codable {
     }
 
     private mutating func update() {
-        guard let tempo, tempo > 0, let timeSignature else {
+        guard let tempo, tempo > 0 else {
             // Log.error("tempo must be set to create the visualMeasure")
+            visualMeasure = nil
+            return
+        }
+
+        guard let timeSignature else {
+            // Log.error("timeSignature must be set to create the visualMeasure")
             visualMeasure = nil
             return
         }

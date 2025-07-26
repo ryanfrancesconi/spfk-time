@@ -24,6 +24,18 @@ public struct TimecodeDomain {
     /// The real time duration one second of current timecode
     public private(set) var timecodeSecond: TimeInterval = 1
 
+    public private(set) var frameRateMultiplier: Double = 1
+
+    var isFractional: Bool {
+        frameRate.isDrop ||
+            frameRate == .fps23_976 ||
+            frameRate == .fps24_98 ||
+            frameRate == .fps29_97 ||
+            frameRate == .fps47_952 ||
+            frameRate == .fps59_94 ||
+            frameRate == .fps119_88
+    }
+
     // MARK: - Init
 
     init(showSubFrames: Bool = false) {
@@ -52,6 +64,7 @@ public struct TimecodeDomain {
         }
 
         self.timecodeSecond = sec
+        self.frameRateMultiplier = isFractional ? 1.001 : 1
     }
 
     // MARK: - Frame Rate
