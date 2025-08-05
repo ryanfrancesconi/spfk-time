@@ -7,6 +7,7 @@ struct VisualMusicalTimeTests {
     @Test func updateValues1() async throws {
         var visualTime = VisualMusicalTime()
 
+        visualTime.timeSignature = ._4_4
         visualTime.tempo = 60
         visualTime.pixelsPerSecond = 60
 
@@ -17,6 +18,7 @@ struct VisualMusicalTimeTests {
 
     @Test func updateValues2() async throws {
         var visualTime = VisualMusicalTime()
+        visualTime.timeSignature = ._4_4
         visualTime.tempo = 120
         visualTime.pixelsPerSecond = 30
 

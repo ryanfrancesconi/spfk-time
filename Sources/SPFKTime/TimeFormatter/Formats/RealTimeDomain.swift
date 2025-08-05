@@ -2,17 +2,16 @@ import Foundation
 
 public struct RealTimeDomain {
     // MARK: - Properties
-    
+
     public private(set) var masterSeconds: TimeInterval = 0.0
-    
+
     // MARK: - Init
-    
+
     init() {
-        
     }
-    
+
     // MARK: - Internal Methods
-    
+
     mutating func setSeconds(_ seconds: TimeInterval) {
         masterSeconds = seconds
     }

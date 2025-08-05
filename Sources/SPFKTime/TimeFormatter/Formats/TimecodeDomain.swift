@@ -25,16 +25,24 @@ public struct TimecodeDomain {
     public private(set) var timecodeSecond: TimeInterval = 1
 
     public private(set) var frameRateMultiplier: Double = 1
+    public private(set) var timeAdvanceMultiplier: Double = 1
 
     var isFractional: Bool {
-        frameRate.isDrop ||
-            frameRate == .fps23_976 ||
+        frameRate == .fps23_976 ||
             frameRate == .fps24_98 ||
             frameRate == .fps29_97 ||
             frameRate == .fps47_952 ||
             frameRate == .fps59_94 ||
             frameRate == .fps119_88
     }
+
+    var isDrop: Bool {
+        frameRate.isDrop
+    }
+
+    public private(set) var masterTimecode: Timecode
+
+    public private(set) var startTimecode: Timecode?
 
     // MARK: - Init
 
@@ -52,19 +60,22 @@ public struct TimecodeDomain {
         updateProperties()
     }
 
-    private mutating func updateProperties() {
+    public mutating func updateProperties() {
         let hour = Timecode.Components(h: 1)
 
         guard let oneHourTimecode = try? Timecode(.components(hour), at: frameRate) else { return }
 
-        var sec: TimeInterval = oneHourTimecode.realTimeValue / 3600
+        self.timecodeSecond = isDrop ?
+            oneHourTimecode.realTimeValue / 3600 / 1.001 :
+            oneHourTimecode.realTimeValue / 3600
 
-        if frameRate.isDrop {
-            sec /= 1.001
+        self.frameRateMultiplier = isFractional || isDrop ? 1.001 : 1
+
+        timeAdvanceMultiplier = frameRateMultiplier
+
+        if isFractional {
+            timeAdvanceMultiplier *= 1.001
         }
-
-        self.timecodeSecond = sec
-        self.frameRateMultiplier = isFractional ? 1.001 : 1
     }
 
     // MARK: - Frame Rate
@@ -85,22 +96,29 @@ public struct TimecodeDomain {
     ) -> Bool {
         guard newFrameRate != properties.frameRate else { return true }
 
+        defer {
+            updateProperties()
+        }
+
         properties.frameRate = newFrameRate
-        updateProperties()
 
         // update start timecode to reflect new frame rate
         if let startTimecode {
             do {
                 if preservingValuesIfPossible {
                     // attempt to preserve timecode values (Pro Tools/Logic behavior)
-                    if try setStartTimecode(preservingValuesFrom: startTimecode,
-                                            clampPositionToStartTimecode: clampPositionToStartTimecode) {
+                    if try setStartTimecode(
+                        preservingValuesFrom: startTimecode,
+                        clampPositionToStartTimecode: clampPositionToStartTimecode
+                    ) {
                         return true
                     }
                 } else {
                     // always convert entire timecode (Cubase/Nuendo behavior)
-                    if try setStartTimecode(convertingFrom: startTimecode,
-                                            clampPositionToStartTimecode: clampPositionToStartTimecode) {
+                    if try setStartTimecode(
+                        convertingFrom: startTimecode,
+                        clampPositionToStartTimecode: clampPositionToStartTimecode
+                    ) {
                         return true
                     }
                 }
@@ -122,9 +140,6 @@ public struct TimecodeDomain {
 
     // MARK: - Timecode
 
-    // guaranteed to be set during init()
-    public private(set) var masterTimecode: Timecode
-
     /// Sets the timecode directly, not applying any `startTimecode` offset and without converting from different frame rate or base settings.
     /// Returns `true` if the value was set without alteration due to validation.
     ///
@@ -143,6 +158,7 @@ public struct TimecodeDomain {
            let startTimecode,
            timecode < startTimecode {
             timecode = startTimecode
+
             valid = false
         }
 
@@ -156,22 +172,28 @@ public struct TimecodeDomain {
     /// Returns `true` if the value was set without alteration due to validation.
     ///
     /// Internal. Should only be called from a `TransportTime` method.
-    mutating func setTimecode(literallyConvertingFrom timecode: Timecode,
-                              clampPositionToStartTimecode: Bool) -> Bool {
+    mutating func setTimecode(
+        literallyConvertingFrom timecode: Timecode,
+        clampPositionToStartTimecode: Bool
+    ) -> Bool {
         let validation: Timecode.ValidationRule = clampPositionToStartTimecode ? .clamping : .wrapping
 
         guard let convertedTC = try? formNewTimecode(convertingFrom: timecode, by: validation) else { return false }
 
-        return setTimecode(literally: convertedTC,
-                           clampPositionToStartTimecode: clampPositionToStartTimecode)
+        return setTimecode(
+            literally: convertedTC,
+            clampPositionToStartTimecode: clampPositionToStartTimecode
+        )
     }
 
     /// Sets the `seconds` value directly as its equivalent timecode, not applying any `startTimecode` offset.
     /// Returns `true` if the value was set without alteration due to validation.
     ///
     /// Internal. Should only be called from a `TransportTime` method.
-    mutating func setTimecode(literally seconds: TimeInterval,
-                              clampPositionToStartTimecode: Bool) throws -> Bool {
+    mutating func setTimecode(
+        literally seconds: TimeInterval,
+        clampPositionToStartTimecode: Bool
+    ) throws -> Bool {
         let seconds = seconds.clamped(to: 0...)
 
         var newTC: Timecode
@@ -193,18 +215,21 @@ public struct TimecodeDomain {
     /// Internal. Should only be called from a `TransportTime` method.
     mutating func setTimecode(elapsedTime seconds: TimeInterval) throws -> Bool {
         let startTime = startTimecode?.realTimeValue ?? 0.0
-        return try setTimecode(literally: startTime + seconds,
-                               clampPositionToStartTimecode: false)
+
+        return try setTimecode(
+            literally: startTime + seconds,
+            clampPositionToStartTimecode: false
+        )
     }
 
     // MARK: - Start Timecode
 
-    public private(set) var startTimecode: Timecode?
-
     /// Internal. Should only be called from a `TransportTime` method.
     /// Returns `true` if the start timecode was set without needing to alter master timecode due to validation.
-    mutating func setStartTimecode(seconds: TimeInterval?,
-                                   clampPositionToStartTimecode: Bool) throws -> Bool {
+    mutating func setStartTimecode(
+        seconds: TimeInterval?,
+        clampPositionToStartTimecode: Bool
+    ) throws -> Bool {
         guard let seconds else {
             startTimecode = nil
             return true
@@ -221,8 +246,10 @@ public struct TimecodeDomain {
 
     /// Internal. Should only be called from a `TransportTime` method.
     /// Returns `true` if the start timecode was set without needing to alter master timecode due to validation.
-    mutating func setStartTimecode(convertingFrom tc: Timecode?,
-                                   clampPositionToStartTimecode: Bool) throws -> Bool {
+    mutating func setStartTimecode(
+        convertingFrom tc: Timecode?,
+        clampPositionToStartTimecode: Bool
+    ) throws -> Bool {
         guard let tc else {
             startTimecode = nil
             return true
@@ -243,8 +270,10 @@ public struct TimecodeDomain {
 
     /// Internal. Should only be called from a `TransportTime` method.
     /// Returns `true` if the start timecode was set without needing to alter master timecode due to validation.
-    mutating func setStartTimecode(preservingValuesFrom tc: Timecode?,
-                                   clampPositionToStartTimecode: Bool) throws -> Bool {
+    mutating func setStartTimecode(
+        preservingValuesFrom tc: Timecode?,
+        clampPositionToStartTimecode: Bool
+    ) throws -> Bool {
         guard let tc else {
             startTimecode = nil
             return true
@@ -265,9 +294,9 @@ public struct TimecodeDomain {
     /// Internal. If master timecode is prior to start timecode, it will be clamped.
     /// Returns `true` if clamping occurred.
     fileprivate mutating func clampMasterTimecode() -> Bool {
-        if let startTC = startTimecode,
-           startTC > masterTimecode {
-            masterTimecode = startTC
+        if let startTimecode,
+           startTimecode > masterTimecode {
+            masterTimecode = startTimecode
             return false
         }
 
@@ -280,11 +309,13 @@ public struct TimecodeDomain {
     ///
     /// Internal. Should only be called from a TransportTime method.
     func calculateElapsedRealTime() -> TimeInterval {
-        if let startTC = startTimecode {
-            return masterTimecode.realTimeValue - startTC.realTimeValue
-        } else {
-            return masterTimecode.realTimeValue
+        var value = masterTimecode.realTimeValue
+
+        if let startTimecode {
+            value -= startTimecode.realTimeValue
         }
+
+        return value
     }
 }
 

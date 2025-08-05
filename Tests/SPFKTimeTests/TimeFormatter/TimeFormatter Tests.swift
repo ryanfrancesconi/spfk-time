@@ -20,6 +20,22 @@ struct TimeFormatterTests {
         #expect(tt.timecode.properties.frameRate == fr)
         #expect(tt.timecode.masterTimecode == tc)
     }
+    
+    @Test func testUpdate_ElapsedTime2() throws {
+        var tt = TimeFormatter(primaryDomain: .timecode)
+        let fr: TimecodeFrameRate = .fps30d
+        let tc = try Timecode(.components(h: 1), at: fr)
+
+        tt.update(frameRate: fr)
+        tt.update(elapsedTime: tc.realTimeValue)
+
+        tt.update(start: tc.realTimeValue)
+        
+        #expect(tt.primaryString == "01:00:00;00")
+        #expect(tt.realTime.masterSeconds == tc.realTimeValue)
+        #expect(tt.timecode.properties.frameRate == fr)
+        #expect(tt.timecode.masterTimecode == tc)
+    }
 
     @Test func testUpdate_Position_Timecode() throws {
         var tt = TimeFormatter(primaryDomain: .timecode)

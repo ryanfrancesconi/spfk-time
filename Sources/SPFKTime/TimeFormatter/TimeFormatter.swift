@@ -29,6 +29,7 @@ extension TimeFormatter {
 
         if didSucceed == true {
             realTime.setSeconds(elapsedTime)
+
         } else {
             realTime.setSeconds(timecode.calculateElapsedRealTime())
         }
@@ -38,8 +39,11 @@ extension TimeFormatter {
     ///
     /// This will update `timecode` with this value if it is valid, and update `realTime` to be the corresponding elapsed time, taking into account the timecode start time.
     public mutating func update(position: Timecode) {
-        _ = timecode.setTimecode(literallyConvertingFrom: position,
-                                 clampPositionToStartTimecode: true)
+        _ = timecode.setTimecode(
+            literallyConvertingFrom: position,
+            clampPositionToStartTimecode: true
+        )
+
         realTime.setSeconds(timecode.calculateElapsedRealTime())
     }
 
@@ -47,29 +51,39 @@ extension TimeFormatter {
     ///
     /// This will update `timecode` with this value if it is valid, and update `realTime` to be the corresponding elapsed time, taking into account the timecode start time.
     public mutating func update(position: TimeInterval) {
-        _ = try? timecode.setTimecode(literally: position,
-                                      clampPositionToStartTimecode: true)
+        _ = try? timecode.setTimecode(
+            literally: position,
+            clampPositionToStartTimecode: true
+        )
+
         realTime.setSeconds(timecode.calculateElapsedRealTime())
     }
 
     /// Update the start time (offset) for timecode domain.
     /// Passing `nil` is the same as passing 0.
     public mutating func update(start: TimeInterval?) {
-        _ = try? timecode.setStartTimecode(seconds: start,
-                                           clampPositionToStartTimecode: true)
+        _ = try? timecode.setStartTimecode(
+            seconds: start,
+            clampPositionToStartTimecode: true
+        )
     }
 
     /// Update the start time (offset) for timecode domain.
     /// Passing `nil` is the same as passing 0.
     public mutating func update(start: Timecode?) throws {
-        _ = try timecode.setStartTimecode(convertingFrom: start,
-                                          clampPositionToStartTimecode: true)
+        _ = try timecode.setStartTimecode(
+            convertingFrom: start,
+            clampPositionToStartTimecode: true
+        )
     }
 
     /// Update the frame rate.
     /// The timecode position and start timecode will be converted to the new frame rate if necessary.
-    public mutating func update(frameRate: TimecodeFrameRate,
-                                preservingValuesIfPossible: Bool = true) {
+    public mutating func update(
+        frameRate: TimecodeFrameRate,
+        preservingValuesIfPossible: Bool = true
+    ) {
+        guard timecode.frameRate != frameRate else { return }
         // Log.debug("⏰ frameRate to", frameRate.stringValue)
 
         _ = timecode.setFrameRate(
@@ -108,7 +122,7 @@ extension TimeFormatter {
             return RealTimeDomain.string(
                 seconds: seconds,
                 showHours: .auto,
-                showMilliseconds: true
+                showMilliseconds: false
             )
 
         case .timecode:
