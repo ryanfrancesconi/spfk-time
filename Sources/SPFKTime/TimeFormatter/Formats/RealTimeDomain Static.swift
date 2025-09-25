@@ -10,10 +10,11 @@ extension RealTimeDomain {
     ///   - showHours: `enable` forces hours to display, `disable` hides hours and allows minutes to be >60, `nil` automatically shows hours if minutes are >60
     ///   - showMilliseconds: enables milliseconds display
     /// - Returns: resulting time format string
-    public static func string(seconds: TimeInterval,
-                              showHours: HoursFormat,
-                              showMilliseconds: Bool) -> String
-    {
+    public static func string(
+        seconds: TimeInterval,
+        showHours: HoursFormat,
+        showMilliseconds: Bool = false
+    ) -> String {
         let sign = seconds < 0.0 ? "-" : ""
         let absSeconds = seconds < 0.0 ? abs(seconds) : seconds
 
@@ -30,16 +31,20 @@ extension RealTimeDomain {
         switch showHours {
         case .auto:
             if minutes >= 60 { enableHours() }
+
         case .enable:
             enableHours()
+
         case .disable:
             strHours = ""
         }
 
         let strMinutes = String(format: "%02d", minutes) + ":"
+
         let strSeconds = String(format: "%02d", seconds)
+
         let strMilliseconds: String = showMilliseconds
-            ? "." + Int(absSeconds * 1_000).string(paddedTo: 3).suffix(3)
+            ? "." + Int(absSeconds * 1000).string(paddedTo: 3).suffix(3)
             : ""
 
         return sign + strHours + strMinutes + strSeconds + strMilliseconds
@@ -66,7 +71,7 @@ extension RealTimeDomain {
         switch components.count {
         // hour 01:00:00.000
         case 3:
-            let h = (components[0].double ?? 0) * 3_600
+            let h = (components[0].double ?? 0) * 3600
             let m = (components[1].double ?? 0) * 60
             let s = (components[2].double ?? 0)
 
