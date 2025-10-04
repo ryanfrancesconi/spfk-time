@@ -1,5 +1,5 @@
-import SPFKUtils
 import CoreVideo
+import SPFKUtils
 
 /// Analog to the CADisplayLink in iOS.
 

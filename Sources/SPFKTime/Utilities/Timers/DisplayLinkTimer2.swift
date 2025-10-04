@@ -36,7 +36,6 @@ public class DisplayLinkTimer2: TimerModel {
         guard state == .suspended else { return }
 
         displayLink?.isPaused = false
-
         displayLink?.add(to: .main, forMode: .common)
 
         state = .resumed
@@ -44,8 +43,8 @@ public class DisplayLinkTimer2: TimerModel {
 
     public func suspend() {
         guard state == .resumed else { return }
+        
         displayLink?.isPaused = true
-
         displayLink?.remove(from: .main, forMode: .common)
 
         state = .suspended

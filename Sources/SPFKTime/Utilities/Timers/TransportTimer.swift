@@ -1,17 +1,23 @@
-import SPFKUtils
 import AVFoundation
 import OTAtomics
 import OTCore
+import SPFKUtils
 import TimecodeKit
 
 public class TransportTimer {
     public enum Event {
         case state(PlayState)
         case time(TimeInterval)
+        
+//        case willEnd
+//        case ended
     }
 
     public enum PlayState {
-        case start, stop, pause, resume
+        case start
+        case stop
+        case pause
+        case resume
     }
 
     public var eventHandler: ((Event) -> Void)?
@@ -36,7 +42,9 @@ public class TransportTimer {
     /// This is a real time value. Can only be set when the timer isn't running.
     @OTAtomicsThreadSafe public var position: TimeInterval = 0
 
-    public var isPlaying: Bool {
+    public var duration: TimeInterval?
+    
+    public var isRunning: Bool {
         mainTimer.state == .resumed
     }
 
@@ -69,14 +77,19 @@ public class TransportTimer {
         guard let elapsedTime = currentTime.timeIntervalSince(otherTime: startTime) else {
             return
         }
-        
+
         position = elapsedTime
-        eventHandler?(.time(elapsedTime))
+        
+        eventHandler?(
+            .time(elapsedTime)
+        )
     }
 
-    public func start(at time: TimeInterval? = nil,
-                      hostTime: UInt64? = nil) {
-        guard !isPlaying else {
+    public func start(
+        at time: TimeInterval? = nil,
+        hostTime: UInt64? = nil
+    ) {
+        guard !isRunning else {
             Log.error("Transport is already playing")
             return
         }
@@ -91,14 +104,14 @@ public class TransportTimer {
     }
 
     public func stop() {
-        guard isPlaying else { return }
+        guard isRunning else { return }
 
         mainTimer.suspend()
         eventHandler?(.state(.stop))
     }
 
     public func pause() {
-        guard isPlaying else { return }
+        guard isRunning else { return }
         stop()
         isPaused = true
         eventHandler?(.state(.pause))
