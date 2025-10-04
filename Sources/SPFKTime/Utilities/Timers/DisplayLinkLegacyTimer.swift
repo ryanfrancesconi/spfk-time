@@ -1,8 +1,9 @@
-import SPFKUtils
 import Foundation
+import SPFKUtils
 
-// Timer based on screen refresh rate
-public class DisplayLinkTimer: TimerModel {
+/// Legacy Timer based on screen refresh rate
+@available(macOS, deprecated: 14.0, message: "Use DisplayLinkTimer2")
+public class DisplayLinkLegacyTimer: TimerModel {
     public var timeInterval: TimeInterval {
         displayLink?.timeInterval ?? 0
     }
@@ -17,9 +18,10 @@ public class DisplayLinkTimer: TimerModel {
 
     private var displayLink: DisplayLink?
 
-    public init() {
+    public init(onQueue queue: DispatchQueue = .global(qos: .default)) {
         do {
-            displayLink = try DisplayLink()
+            Log.debug("Creating on", queue)
+            displayLink = try DisplayLink(onQueue: queue)
         } catch {
             Log.error(error)
         }
@@ -38,8 +40,11 @@ public class DisplayLinkTimer: TimerModel {
     }
 
     deinit {
-        Log.debug("* { DisplayLinkTimer }")
+        Log.debug("* { DisplayLinkLegacyTimer }")
+    }
 
+    public func dispose() {
+        displayLink?.cancel()
         eventHandler = nil
         displayLink = nil
     }

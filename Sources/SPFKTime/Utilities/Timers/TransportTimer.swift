@@ -1,5 +1,5 @@
+import AppKit
 import AVFoundation
-import OTAtomics
 import OTCore
 import SPFKUtils
 import TimecodeKit
@@ -8,7 +8,7 @@ public class TransportTimer {
     public enum Event {
         case state(PlayState)
         case time(TimeInterval)
-        
+
 //        case willEnd
 //        case ended
     }
@@ -28,7 +28,7 @@ public class TransportTimer {
 
     private var pauseTimer: Timer?
 
-    @OTAtomicsThreadSafe private var startTime = AVAudioTime.now()
+    private var startTime = AVAudioTime.now()
 
     private var lastStoredHostTime: UInt64 = 0
 
@@ -40,10 +40,10 @@ public class TransportTimer {
 
     /// The current position of the playhead in fractional seconds
     /// This is a real time value. Can only be set when the timer isn't running.
-    @OTAtomicsThreadSafe public var position: TimeInterval = 0
+    public var position: TimeInterval = 0
 
     public var duration: TimeInterval?
-    
+
     public var isRunning: Bool {
         mainTimer.state == .resumed
     }
@@ -58,10 +58,15 @@ public class TransportTimer {
 
     // MARK: - Init
 
-    public init(eventHandler: ((Event) -> Void)? = nil) {
-        mainTimer = DisplayLinkTimer()
-        mainTimer.eventHandler = updateTime
-        self.eventHandler = eventHandler
+    public init(on view: NSView) {
+        if #available(macOS 14, *) {
+            mainTimer = DisplayLinkTimer2(on: view)
+            mainTimer.eventHandler = updateTime
+
+        } else {
+            mainTimer = DisplayLinkLegacyTimer(onQueue: .main)
+            mainTimer.eventHandler = updateTime
+        }
     }
 
     deinit {
@@ -79,7 +84,7 @@ public class TransportTimer {
         }
 
         position = elapsedTime
-        
+
         eventHandler?(
             .time(elapsedTime)
         )

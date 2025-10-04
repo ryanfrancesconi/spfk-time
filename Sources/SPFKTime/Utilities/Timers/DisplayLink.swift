@@ -2,13 +2,8 @@ import CoreVideo
 import SPFKUtils
 
 /// Analog to the CADisplayLink in iOS.
-
-/*
- @available(macOS 14.0, *)
- extension NSWindow {
-     open func displayLink(target: Any, selector: Selector) -> CADisplayLink
- }
- */
+/// Pre macOS 14 class
+@available(macOS, deprecated: 14.0, message: "Use DisplayLinkTimer2")
 public class DisplayLink {
     public let displaylink: CVDisplayLink
 

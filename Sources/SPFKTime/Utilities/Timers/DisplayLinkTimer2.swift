@@ -23,37 +23,47 @@ public class DisplayLinkTimer2: TimerModel {
 
     private var displayLink: CADisplayLink?
 
+    public private(set) var elapsed: CFTimeInterval = 0
+
     public init(on view: NSView, eventHandler: (() -> Void)? = nil) {
         displayLink = view.displayLink(target: self, selector: #selector(handleUpdate))
         self.eventHandler = eventHandler
     }
 
-    @objc func handleUpdate(_ sender: Any) {
+    @objc private func handleUpdate(_ sender: CADisplayLink) {
         eventHandler?()
     }
 
     public func resume() {
+        guard let displayLink else { return }
+
         guard state == .suspended else { return }
 
-        displayLink?.isPaused = false
-        displayLink?.add(to: .main, forMode: .common)
+        displayLink.isPaused = false
+        displayLink.add(to: .main, forMode: .common)
 
         state = .resumed
     }
 
     public func suspend() {
+        guard let displayLink else { return }
+
         guard state == .resumed else { return }
-        
-        displayLink?.isPaused = true
-        displayLink?.remove(from: .main, forMode: .common)
+
+        elapsed = 0
+        displayLink.isPaused = true
+        displayLink.remove(from: .main, forMode: .common)
 
         state = .suspended
     }
 
+    public func dispose() {
+        displayLink?.invalidate()
+        displayLink = nil
+        eventHandler = nil
+    }
+
     deinit {
         Log.debug("* { DisplayLinkTimer2 }")
-
-        displayLink?.invalidate()
-        eventHandler = nil
     }
 }
