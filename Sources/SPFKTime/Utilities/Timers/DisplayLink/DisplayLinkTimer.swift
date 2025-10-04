@@ -3,10 +3,14 @@ import Foundation
 import SPFKUtils
 
 @available(macOS 14, *)
-public class DisplayLinkTimer2: TimerModel {
+public class DisplayLinkTimer: TimerModel {
+    public var eventHandler: (() -> Void)?
+
     public var timeInterval: TimeInterval {
         displayLink?.duration ?? 0
     }
+
+    public private(set) var state: TimerState = .suspended
 
     public var fps: Double {
         guard let displayLink else { return 0 }
@@ -17,17 +21,18 @@ public class DisplayLinkTimer2: TimerModel {
         displayLink?.timestamp ?? 0
     }
 
-    public var eventHandler: (() -> Void)?
-
-    public private(set) var state: TimerFactory.State = .suspended
-
     private var displayLink: CADisplayLink?
 
-    public private(set) var elapsed: CFTimeInterval = 0
-
-    public init(on view: NSView, eventHandler: (() -> Void)? = nil) {
+    public init(on view: NSView) {
         displayLink = view.displayLink(target: self, selector: #selector(handleUpdate))
-        self.eventHandler = eventHandler
+    }
+
+    public init(window: NSWindow) {
+        displayLink = window.displayLink(target: self, selector: #selector(handleUpdate))
+    }
+
+    public init(screen: NSScreen) {
+        displayLink = screen.displayLink(target: self, selector: #selector(handleUpdate))
     }
 
     @objc private func handleUpdate(_ sender: CADisplayLink) {
@@ -50,7 +55,6 @@ public class DisplayLinkTimer2: TimerModel {
 
         guard state == .resumed else { return }
 
-        elapsed = 0
         displayLink.isPaused = true
         displayLink.remove(from: .main, forMode: .common)
 
@@ -64,6 +68,6 @@ public class DisplayLinkTimer2: TimerModel {
     }
 
     deinit {
-        Log.debug("* { DisplayLinkTimer2 }")
+        Log.debug("* { DisplayLinkTimer }")
     }
 }

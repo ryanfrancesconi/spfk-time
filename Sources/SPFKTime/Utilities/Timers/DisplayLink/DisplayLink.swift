@@ -2,11 +2,10 @@ import CoreVideo
 import SPFKUtils
 
 /// Analog to the CADisplayLink in iOS.
-/// Pre macOS 14 class
-@available(macOS, deprecated: 14.0, message: "Use DisplayLinkTimer2")
+/// Pre macOS 14 class, will use the main display
+@available(macOS, deprecated: 14.0, message: "Use DisplayLinkTimer")
 public class DisplayLink {
     public let displaylink: CVDisplayLink
-
     let source: DispatchSourceUserDataAdd
 
     public var callback: (() -> Void)?
@@ -24,7 +23,7 @@ public class DisplayLink {
      - Parameters:
      - queue: Queue which will receive the callback calls
      */
-    public init(onQueue queue: DispatchQueue = .global(qos: .default)) throws {
+    public init(onQueue queue: DispatchQueue = .main) throws {
         // Source
         source = DispatchSource.makeUserDataAddSource(queue: queue)
 

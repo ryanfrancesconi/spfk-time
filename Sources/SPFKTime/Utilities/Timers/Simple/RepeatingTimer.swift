@@ -14,7 +14,7 @@ public class RepeatingTimer: TimerModel {
         }
     }
 
-    public private(set) var state: TimerFactory.State = .suspended
+    public private(set) var state: TimerState = .suspended
 
     public private(set) var timeInterval: TimeInterval = 1
 
@@ -30,18 +30,26 @@ public class RepeatingTimer: TimerModel {
         self.timeInterval = timeInterval
         self.leeway = leeway
 
-        queue = DispatchQueue(label: "com.audiodesigndesk.ADD.RepeatingTimer",
-                              qos: qos)
+        queue = DispatchQueue(
+            label: "com.spongefork.SPFKTime.RepeatingTimer",
+            qos: qos
+        )
 
         self.eventHandler = eventHandler
     }
 
     private lazy var timer: DispatchSourceTimer = {
-        let source = DispatchSource.makeTimerSource(flags: DispatchSource.TimerFlags(),
-                                                    queue: queue)
-        source.schedule(deadline: .now() + timeInterval,
-                        repeating: timeInterval,
-                        leeway: .milliseconds(leeway))
+        let source = DispatchSource.makeTimerSource(
+            flags: DispatchSource.TimerFlags(),
+            queue: queue
+        )
+
+        source.schedule(
+            deadline: .now() + timeInterval,
+            repeating: timeInterval,
+            leeway: .milliseconds(leeway)
+        )
+
         return source
     }()
 
@@ -63,7 +71,7 @@ public class RepeatingTimer: TimerModel {
         timer.suspend()
     }
 
-    deinit {
+    public func dispose() {
         timer.setEventHandler {}
         timer.cancel()
         /*
@@ -72,5 +80,8 @@ public class RepeatingTimer: TimerModel {
          */
         resume()
         eventHandler = nil
+    }
+
+    deinit {
     }
 }

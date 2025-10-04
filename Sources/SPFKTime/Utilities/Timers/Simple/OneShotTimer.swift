@@ -16,13 +16,14 @@ public class OneShotTimer: TimerModel {
         let requestWorkItem = DispatchWorkItem(block: block)
 
         pendingRequestWorkItem = requestWorkItem
+
         queue.asyncAfter(deadline: .now() + after,
                          execute: requestWorkItem)
     }
 
     public var eventHandler: (() -> Void)?
 
-    public private(set) var state: TimerFactory.State = .suspended
+    public private(set) var state: TimerState = .suspended
 
     public private(set) var timeInterval: TimeInterval = 1
 
@@ -54,8 +55,12 @@ public class OneShotTimer: TimerModel {
         pendingRequestWorkItem = nil
     }
 
-    deinit {
+    public func dispose() {
         suspend()
+        pendingRequestWorkItem = nil
         eventHandler = nil
+    }
+
+    deinit {
     }
 }

@@ -8,7 +8,7 @@ public class BasicTimer: TimerModel {
 
     public var eventHandler: (() -> Void)?
 
-    public private(set) var state: TimerFactory.State = .suspended
+    public private(set) var state: TimerState = .suspended
 
     public private(set) var timeInterval: TimeInterval = 1
 
@@ -26,7 +26,6 @@ public class BasicTimer: TimerModel {
 
     public func resume() {
         guard state == .suspended else {
-            // Log.error("Timer is already resumed")
             return
         }
 
@@ -36,16 +35,21 @@ public class BasicTimer: TimerModel {
             timer?.invalidate()
         }
 
-        timer = Timer(timeInterval: timeInterval,
-                      target: self,
-                      selector: #selector(handleEvent),
-                      userInfo: nil,
-                      repeats: true)
+        timer = Timer(
+            timeInterval: timeInterval,
+            target: self,
+            selector: #selector(handleEvent),
+            userInfo: nil,
+            repeats: true
+        )
+
         timer?.tolerance = Double(leeway) / 1000
 
-        if let timer = timer {
-            RunLoop.main.add(timer,
-                             forMode: RunLoop.Mode.common)
+        if let timer {
+            RunLoop.main.add(
+                timer,
+                forMode: .common
+            )
         }
     }
 
@@ -64,8 +68,12 @@ public class BasicTimer: TimerModel {
         eventHandler?()
     }
 
-    deinit {
+    public func dispose() {
         timer?.invalidate()
+        timer = nil
         eventHandler = nil
+    }
+
+    deinit {
     }
 }

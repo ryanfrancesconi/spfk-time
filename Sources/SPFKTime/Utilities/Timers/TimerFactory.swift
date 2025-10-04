@@ -1,6 +1,6 @@
-import SPFKUtils
 import AppKit
 import Foundation
+import SPFKUtils
 import TimecodeKit
 
 // https://developer.apple.com/library/archive/qa/qa1385/_index.html
@@ -28,10 +28,6 @@ public enum TimerFactory {
         case repeating(timeInterval: TimeInterval = fps30,
                        qos: DispatchQoS = .default,
                        leeway: Int = 100)
-    }
-
-    public enum State {
-        case suspended, resumed
     }
 
     public static func createTimer(_ type: TimerType) -> TimerModel {
