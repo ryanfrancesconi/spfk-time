@@ -10,4 +10,9 @@ public enum TransportTimerPlayState {
     case stop
     case pause
     case resume
+
+    public var isPlaying: Bool {
+        self == .start ||
+            self == .resume
+    }
 }

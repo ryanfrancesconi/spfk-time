@@ -69,6 +69,11 @@ public class TransportTimer {
         internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
     }
 
+    public init(dispatchQueue: DispatchQueue) {
+        internalTimer = LegacyDisplayLinkTimer(onQueue: dispatchQueue)
+        internalTimer.eventHandler = updateTime
+    }
+
     deinit {
         Log.debug("* { TransportTimer }")
     }
@@ -78,7 +83,7 @@ public class TransportTimer {
         eventHandler = nil
     }
 
-    /// Received events from the timer on its queue (utility)
+    /// Received event from the timer
     @objc
     public func updateTime() {
         let currentTime = AVAudioTime(hostTime: mach_absolute_time() + Self.hostTimeShim)
@@ -100,7 +105,7 @@ public class TransportTimer {
         hostTime: UInt64? = nil
     ) {
         guard !isRunning else {
-            Log.error("Transport is already playing")
+            Log.error("Transport is already running")
             return
         }
 
@@ -110,8 +115,8 @@ public class TransportTimer {
         lastStoredHostTime = hostTime
 
         startTime = AVAudioTime(hostTime: hostTime).offset(seconds: -time + Self.futureShim)
-
         internalTimer.resume()
+
         send(event: .state(.start))
     }
 
@@ -119,6 +124,7 @@ public class TransportTimer {
         guard isRunning else { return }
 
         internalTimer.suspend()
+
         send(event: .state(.stop))
     }
 
