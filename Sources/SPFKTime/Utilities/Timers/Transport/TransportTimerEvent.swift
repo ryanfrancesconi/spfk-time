@@ -3,6 +3,7 @@ import Foundation
 public enum TransportTimerEvent {
     case state(TransportTimerPlayState)
     case time(TimeInterval)
+    case complete
 }
 
 public enum TransportTimerPlayState {
