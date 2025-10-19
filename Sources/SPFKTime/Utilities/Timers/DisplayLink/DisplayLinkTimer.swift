@@ -41,7 +41,6 @@ public class DisplayLinkTimer: TimerModel {
 
     public func resume() {
         guard let displayLink else { return }
-
         guard state == .suspended else { return }
 
         displayLink.isPaused = false

@@ -18,17 +18,17 @@ public class TransportTimer {
     /// The current position of the playhead in fractional seconds
     /// This is  real time seconds. Can only be set when the timer isn't running.
     public var currentTime: TimeInterval = 0
-
-    private var internalTimer: TimerModel
     private var resumeTask: Task<Void, Error>?
     private var avStartTime = AVAudioTime.now()
     private var lastStoredHostTime: UInt64 = 0
+
+    private var internalTimer: TimerModel
 
     // MARK: - Init
 
     public init(on view: NSView) {
         defer {
-            internalTimer.eventHandler = updateTime
+            internalTimer.eventHandler = handleTimerUpdateEvent
         }
 
         if #available(macOS 14, *) {
@@ -41,7 +41,7 @@ public class TransportTimer {
 
     public init(on window: NSWindow) {
         defer {
-            internalTimer.eventHandler = updateTime
+            internalTimer.eventHandler = handleTimerUpdateEvent
         }
 
         if #available(macOS 14, *) {
@@ -58,7 +58,7 @@ public class TransportTimer {
         }
 
         defer {
-            internalTimer.eventHandler = updateTime
+            internalTimer.eventHandler = handleTimerUpdateEvent
         }
 
         if #available(macOS 14, *) {
@@ -72,7 +72,7 @@ public class TransportTimer {
     @available(macOS, deprecated: 14.0, message: "Use view based timer")
     public init(dispatchQueue: DispatchQueue) {
         internalTimer = LegacyDisplayLinkTimer(onQueue: dispatchQueue)
-        internalTimer.eventHandler = updateTime
+        internalTimer.eventHandler = handleTimerUpdateEvent
     }
 
     deinit {
@@ -86,8 +86,8 @@ public class TransportTimer {
 
     /// Received event from the timer, called on the screen refresh rate
     @objc
-    private func updateTime() {
-        let avNow = AVAudioTime(hostTime: mach_absolute_time() + Self.hostTimeShim)
+    private func handleTimerUpdateEvent() {
+        let avNow = AVAudioTime(hostTime: mach_absolute_time()) // + Self.hostTimeShim)
 
         // Find the difference between current time and start time.
         guard let elapsedTime = avNow.timeIntervalSince(otherTime: avStartTime) else {
@@ -109,11 +109,16 @@ public class TransportTimer {
         }
 
         let hostTime = hostTime ?? mach_absolute_time()
-        lastStoredHostTime = hostTime
 
-        avStartTime = AVAudioTime(hostTime: hostTime).offset(seconds: -time + Self.futureShim)
+        let avTime = AVAudioTime(hostTime: hostTime).offset(seconds: -time) // + Self.futureShim)
+        start(avTime: avTime)
+    }
+
+    public func start(avTime: AVAudioTime) {
+        self.avStartTime = avTime
+        lastStoredHostTime = avTime.hostTime
+
         internalTimer.resume()
-
         send(event: .state(.start))
     }
 
@@ -121,7 +126,6 @@ public class TransportTimer {
         guard isRunning else { return }
 
         internalTimer.suspend()
-
         send(event: .state(.stop))
     }
 
