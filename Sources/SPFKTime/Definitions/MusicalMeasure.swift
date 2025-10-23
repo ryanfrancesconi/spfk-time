@@ -13,7 +13,7 @@ public struct MusicalMeasure {
 
     public var timeSignature: TimeSignature = ._4_4
 
-    // used in transport display
+    /// used in transport display
     public var stringValue: String {
         String(bar) + " " + String(beat) + " " + String(subdivision)
     }
