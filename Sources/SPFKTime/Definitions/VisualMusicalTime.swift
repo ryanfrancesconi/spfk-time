@@ -80,4 +80,40 @@ public struct VisualMusicalTime: Equatable, Codable {
             Log.error(error)
         }
     }
+
+    /// How far away in seconds is the next bar relative to currenTime passed in. Useful
+    /// for step controls where you want to snap to the next bar. The visualMeasure
+    /// must be set or nil is returned.
+    ///
+    /// - Parameters:
+    ///   - currentTime: where the timeline is
+    ///   - direction: which direction, rewind or forward
+    /// - Returns: The time to the bar
+    public func timeToNearestBar(at currentTime: TimeInterval, direction: MovementDirection) -> TimeInterval? {
+        guard let visualMeasure else { return nil }
+
+        let timeOfOneBar = visualMeasure.pixelsPerBar / pixelsPerSecond
+
+        var timeTillNextBar = (currentTime / timeOfOneBar).truncatingRemainder(dividingBy: 1)
+
+        if timeTillNextBar == 0 {
+            timeTillNextBar = timeOfOneBar
+        }
+
+        guard timeTillNextBar != timeOfOneBar else {
+            return timeTillNextBar * direction.doubleValue
+        }
+
+        var value: Double
+
+        switch direction {
+        case .forward:
+            value = (1 - timeTillNextBar) * timeOfOneBar
+
+        case .backward:
+            value = timeTillNextBar * timeOfOneBar
+        }
+
+        return value * direction.doubleValue
+    }
 }
