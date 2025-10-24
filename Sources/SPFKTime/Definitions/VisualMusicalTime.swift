@@ -43,7 +43,7 @@ public struct VisualMusicalTime: Equatable, Codable {
         }
     }
 
-    public private(set) var visualMeasure: VisualMusicalMeasure?
+    public private(set) var visualMeasure: VisualMusicalPulse?
 
     public init(
         pixelsPerSecond: Double = 30,
@@ -71,7 +71,7 @@ public struct VisualMusicalTime: Equatable, Codable {
         }
 
         do {
-            visualMeasure = try VisualMusicalMeasure(
+            visualMeasure = try VisualMusicalPulse(
                 pixelsPerSecond: pixelsPerSecond,
                 tempo: tempo,
                 timeSignature: timeSignature
@@ -81,7 +81,7 @@ public struct VisualMusicalTime: Equatable, Codable {
         }
     }
 
-    /// How far away in seconds is the next bar relative to currenTime passed in. Useful
+    /// How far away in seconds is the next bar/beat/subdivision relative to currenTime passed in. Useful
     /// for step controls where you want to snap to the next bar. The visualMeasure
     /// must be set or nil is returned.
     ///
@@ -89,29 +89,34 @@ public struct VisualMusicalTime: Equatable, Codable {
     ///   - currentTime: where the timeline is
     ///   - direction: which direction, rewind or forward
     /// - Returns: The time to the bar
-    public func timeToNearestBar(at currentTime: TimeInterval, direction: MovementDirection) -> TimeInterval? {
+    public func timeToNearest(
+        pulse: Pulse,
+        at currentTime: TimeInterval,
+        direction: MovementDirection
+    ) -> TimeInterval? {
         guard let visualMeasure else { return nil }
 
-        let timeOfOneBar = visualMeasure.pixelsPerBar / pixelsPerSecond
+        let pixels = visualMeasure.pixelsPer(pulse: pulse)
+        let timeOfOneBar = pixels / pixelsPerSecond
 
-        var timeTillNextBar = (currentTime / timeOfOneBar).truncatingRemainder(dividingBy: 1)
+        var timeTillNextPulse = (currentTime / timeOfOneBar).truncatingRemainder(dividingBy: 1)
 
-        if timeTillNextBar == 0 {
-            timeTillNextBar = timeOfOneBar
+        if timeTillNextPulse == 0 {
+            timeTillNextPulse = timeOfOneBar
         }
 
-        guard timeTillNextBar != timeOfOneBar else {
-            return timeTillNextBar * direction.doubleValue
+        guard timeTillNextPulse != timeOfOneBar else {
+            return timeTillNextPulse * direction.doubleValue
         }
 
         var value: Double
 
         switch direction {
         case .forward:
-            value = (1 - timeTillNextBar) * timeOfOneBar
+            value = (1 - timeTillNextPulse) * timeOfOneBar
 
         case .backward:
-            value = timeTillNextBar * timeOfOneBar
+            value = timeTillNextPulse * timeOfOneBar
         }
 
         return value * direction.doubleValue

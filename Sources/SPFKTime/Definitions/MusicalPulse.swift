@@ -1,6 +1,6 @@
 import Foundation
 
-public struct MusicalMeasure {
+public struct MusicalPulse {
     static let subdivisionsPerBeat: Double = 4
 
     public var tempo: Double = 120 {
