@@ -37,14 +37,14 @@ public struct MusicalPulseDescription: Equatable, Hashable, Codable {
 
         fractionalBar = time * measure.barsPerSecond
         fractionalBeat = fractionalBar.truncatingRemainder(dividingBy: 1) * Double(measure.timeSignature.numerator)
-        fractionalSubdivision = fractionalBeat.truncatingRemainder(dividingBy: 1) * MusicalMeasureDescription.subdivisionsPerBeat
+        fractionalSubdivision = fractionalBeat.truncatingRemainder(dividingBy: 1) * 4
 
         // this rounds down which is what we want for a bar display in the transport
         bar = Int(fractionalBar) + 1
         beat = Int(fractionalBeat) + 1
         subdivision = Int(fractionalSubdivision) + 1
 
-        Swift.print(debugDescription)
+        // Swift.print(debugDescription)
     }
 }
 
@@ -56,6 +56,7 @@ extension MusicalPulseDescription: CustomDebugStringConvertible {
 
 public enum MusicalPulse: Equatable, Codable, Hashable {
     case bar
-    case beat // quarter note
-    case subdivision // sixteenth note
+    case quarter
+    case eighth
+    case sixteenth
 }

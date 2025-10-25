@@ -2,7 +2,6 @@ import Foundation
 
 public struct MusicalMeasureDescription: Equatable, Codable, Hashable {
     public static let tempoRange: ClosedRange<Double> = 1 ... 1024
-    public static let subdivisionsPerBeat: Double = 4
 
     public var timeSignature: TimeSignature {
         didSet {
@@ -31,22 +30,24 @@ public struct MusicalMeasureDescription: Equatable, Codable, Hashable {
     private mutating func update() {
         quarterNoteDuration = 60 / tempo
         quarterNotesPerSecond = 1 / quarterNoteDuration
-        sixteenthNotesPerSecond = quarterNotesPerSecond / Self.subdivisionsPerBeat
+        sixteenthNotesPerSecond = quarterNotesPerSecond / 4
         barsPerSecond = 1 / duration(pulse: .bar)
     }
 
     public func duration(pulse: MusicalPulse) -> TimeInterval {
         switch pulse {
-        case .beat:
-            return quarterNoteDuration
-
         case .bar:
             let quartersPerPulse = 4 / timeSignature.denominator.double
-
             return quarterNoteDuration * timeSignature.numerator.double * quartersPerPulse
 
-        case .subdivision:
-            return quarterNoteDuration / Self.subdivisionsPerBeat
+        case .quarter:
+            return quarterNoteDuration
+            
+        case .eighth:
+            return quarterNoteDuration / 2
+
+        case .sixteenth:
+            return quarterNoteDuration / 4
         }
     }
 }

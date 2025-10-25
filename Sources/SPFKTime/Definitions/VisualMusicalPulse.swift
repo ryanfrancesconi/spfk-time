@@ -2,8 +2,6 @@ import Foundation
 import SPFKUtils
 
 public struct VisualMusicalPulse: Equatable, Codable {
-    private static let subdivisionsPerBeat: CGFloat = 4
-
     public private(set) var measure: MusicalMeasureDescription
 
     /// how many pixels in one second of time
@@ -11,6 +9,8 @@ public struct VisualMusicalPulse: Equatable, Codable {
 
     /// How wide a 1/16 note is in pixels
     private var pixelsPerSubdivision: CGFloat
+
+    private var pixelsPerEighth: CGFloat
 
     /// how wide a beat is in pixels
     private var pixelsPerBeat: CGFloat
@@ -26,8 +26,9 @@ public struct VisualMusicalPulse: Equatable, Codable {
         self.pixelsPerSecond = pixelsPerSecond
         self.measure = measure
 
-        pixelsPerSubdivision = pixelsPerSecond * measure.duration(pulse: .subdivision)
-        pixelsPerBeat = pixelsPerSecond * measure.duration(pulse: .beat)
+        pixelsPerSubdivision = pixelsPerSecond * measure.duration(pulse: .sixteenth)
+        pixelsPerEighth = pixelsPerSecond * measure.duration(pulse: .eighth)
+        pixelsPerBeat = pixelsPerSecond * measure.duration(pulse: .quarter)
         pixelsPerBar = pixelsPerSecond * measure.duration(pulse: .bar)
     }
 
@@ -36,10 +37,13 @@ public struct VisualMusicalPulse: Equatable, Codable {
         case .bar:
             pixelsPerBar
 
-        case .beat:
+        case .quarter:
             pixelsPerBeat
 
-        case .subdivision:
+        case .eighth:
+            pixelsPerEighth
+
+        case .sixteenth:
             pixelsPerSubdivision
         }
     }
