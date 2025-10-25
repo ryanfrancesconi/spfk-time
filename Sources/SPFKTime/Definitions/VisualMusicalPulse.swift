@@ -1,41 +1,37 @@
 import Foundation
+import SPFKUtils
 
 public struct VisualMusicalPulse: Equatable, Codable {
     private static let subdivisionsPerBeat: CGFloat = 4
 
-    public private(set) var timeSignature: TimeSignature
-
-    public private(set) var tempo: Double
-
-    /// How wide a 1/16 note is in pixels
-    public private(set) var pixelsPerSubdivision: CGFloat
-
-    /// how wide a beat is in pixels
-    public private(set) var pixelsPerBeat: CGFloat
-
-    /// how wide a bar is in pixels
-    public private(set) var pixelsPerBar: CGFloat
+    public private(set) var measure: MusicalMeasureDescription
 
     /// how many pixels in one second of time
     public private(set) var pixelsPerSecond: Double
 
-    public init(pixelsPerSecond: Double, tempo: Double, timeSignature: TimeSignature) throws {
-        guard tempo > 0 else {
+    /// How wide a 1/16 note is in pixels
+    private var pixelsPerSubdivision: CGFloat
+
+    /// how wide a beat is in pixels
+    private var pixelsPerBeat: CGFloat
+
+    /// how wide a bar is in pixels
+    private var pixelsPerBar: CGFloat
+
+    public init(pixelsPerSecond: Double, measure: MusicalMeasureDescription) throws {
+        guard measure.tempo > 0 else {
             throw NSError(description: "tempo must be greater than zero")
         }
 
         self.pixelsPerSecond = pixelsPerSecond
-        self.timeSignature = timeSignature
-        self.tempo = tempo
+        self.measure = measure
 
-        let beatsInSecond: Double = tempo / 60
-
-        pixelsPerSubdivision = CGFloat(pixelsPerSecond / beatsInSecond / Double(timeSignature.numerator))
-        pixelsPerBeat = pixelsPerSubdivision * Self.subdivisionsPerBeat
-        pixelsPerBar = pixelsPerBeat * CGFloat(timeSignature.numerator)
+        pixelsPerSubdivision = pixelsPerSecond * measure.duration(pulse: .subdivision)
+        pixelsPerBeat = pixelsPerSecond * measure.duration(pulse: .beat)
+        pixelsPerBar = pixelsPerSecond * measure.duration(pulse: .bar)
     }
 
-    public func pixelsPer(pulse: Pulse) -> CGFloat {
+    public func width(of pulse: MusicalPulse) -> CGFloat {
         switch pulse {
         case .bar:
             pixelsPerBar
@@ -45,16 +41,6 @@ public struct VisualMusicalPulse: Equatable, Codable {
 
         case .subdivision:
             pixelsPerSubdivision
-            
-        case .second:
-            pixelsPerSecond
         }
     }
-}
-
-public enum Pulse: Equatable, Codable, Hashable {
-    case bar
-    case beat
-    case subdivision
-    case second
 }

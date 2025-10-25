@@ -13,6 +13,16 @@
   },
   "testTargets" : [
     {
+      "skippedTests" : {
+        "suites" : [
+          {
+            "name" : "MusicalMeasureDescriptionTests",
+            "testFunctions" : [
+              "generateTests()"
+            ]
+          }
+        ]
+      },
       "target" : {
         "containerPath" : "container:",
         "identifier" : "SPFKTimeTests",
@@ -20,5 +30,5 @@
       }
     }
   ],
-  "version" : 1
+  "version" : 2
 }
