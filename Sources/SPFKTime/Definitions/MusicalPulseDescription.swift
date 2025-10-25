@@ -54,7 +54,7 @@ extension MusicalPulseDescription: CustomDebugStringConvertible {
     }
 }
 
-public enum MusicalPulse: Equatable, Codable, Hashable {
+public enum MusicalPulse: String, Equatable, Codable, Hashable {
     case bar
     case quarter
     case eighth

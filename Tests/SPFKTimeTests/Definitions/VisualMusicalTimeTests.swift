@@ -5,83 +5,79 @@ import SPFKUtils
 import Testing
 
 struct VisualMusicalTimeTests {
-    @Test func updateValues_4_4_60() {
+    @Test func width_4_4_60() {
         var visualTime = VisualMusicalTime()
         visualTime.timeSignature = ._4_4
         visualTime.tempo = 60
         visualTime.pixelsPerSecond = 60
 
         #expect(visualTime.visualPulse?.width(of: .bar) == 240)
-        #expect(visualTime.visualPulse?.width(of: .beat) == 60)
-        #expect(visualTime.visualPulse?.width(of: .subdivision) == 15)
+        #expect(visualTime.visualPulse?.width(of: .quarter) == 60)
+        #expect(visualTime.visualPulse?.width(of: .sixteenth) == 15)
     }
 
-    @Test func updateValues_8_8_60() {
+    // should match width_4_4_60
+    @Test func width_8_8_60() {
         var visualTime = VisualMusicalTime()
         visualTime.timeSignature = ._8_8
         visualTime.tempo = 60
         visualTime.pixelsPerSecond = 60
 
         #expect(visualTime.visualPulse?.width(of: .bar) == 240)
-        #expect(visualTime.visualPulse?.width(of: .beat) == 60)
-        #expect(visualTime.visualPulse?.width(of: .subdivision) == 15)
+        #expect(visualTime.visualPulse?.width(of: .quarter) == 60)
+        #expect(visualTime.visualPulse?.width(of: .sixteenth) == 15)
     }
-    
-    @Test func updateValues2() {
+
+    @Test func width_4_4_120() {
         var visualTime = VisualMusicalTime()
         visualTime.timeSignature = ._4_4
         visualTime.tempo = 120
         visualTime.pixelsPerSecond = 30
 
         #expect(visualTime.visualPulse?.width(of: .bar) == 60)
-        #expect(visualTime.visualPulse?.width(of: .beat) == 15)
-        #expect(visualTime.visualPulse?.width(of: .subdivision) == 3.75)
+        #expect(visualTime.visualPulse?.width(of: .quarter) == 15)
+        #expect(visualTime.visualPulse?.width(of: .sixteenth) == 3.75)
     }
+}
 
-    @Test(arguments: [0, 0.5])
+struct VisualMusicalTimeRegressionTests {
+    // MARK: - these values are pulled from ShadowTag. use for regression tests.
+
+    @Test(arguments: [1, 2, 3, 4])
     func timeToNearest(time: TimeInterval) throws {
-        let tempo: Double = 60
+        #expect(VisualMusicalTime(pixelsPerSecond: 144.33333333333334, tempo: 60.0, timeSignature: try TimeSignature(numerator: 4, denominator: 4)).timeToNearest(pulse: .quarter, at: time, direction: .forward) == 1.0)
 
-        var visualTime = VisualMusicalTime()
-        visualTime.timeSignature = ._4_4
-        visualTime.tempo = tempo
-        visualTime.pixelsPerSecond = 60
-
-        let visualMeasure = try #require(visualTime.visualPulse)
-
-        let barDuration: TimeInterval = visualMeasure.measure.duration(pulse: .bar)
-        let beatDuration: TimeInterval = visualMeasure.measure.duration(pulse: .beat)
-        let subdivisionDuration: TimeInterval = visualMeasure.measure.duration(pulse: .subdivision)
-
-        Log.debug("tempo", tempo, "barDuration", barDuration, "beatDuration", beatDuration, "subdivisionDuration", subdivisionDuration)
-
-        if time == 0 {
-            #expect(visualTime.timeToNearest(pulse: .beat, at: time, direction: .forward) == beatDuration)
-            #expect(visualTime.timeToNearest(pulse: .beat, at: time, direction: .backward) == -beatDuration)
-            #expect(visualTime.timeToNearest(pulse: .bar, at: time, direction: .forward) == barDuration)
-            #expect(visualTime.timeToNearest(pulse: .bar, at: time, direction: .backward) == -barDuration)
-            #expect(visualTime.timeToNearest(pulse: .subdivision, at: time, direction: .forward) == subdivisionDuration)
-            #expect(visualTime.timeToNearest(pulse: .subdivision, at: time, direction: .backward) == -subdivisionDuration)
-
-        } else {
-            #expect(visualTime.timeToNearest(pulse: .beat, at: time, direction: .forward) == beatDuration - time)
-            #expect(visualTime.timeToNearest(pulse: .beat, at: time, direction: .backward) == -time)
-
-            #expect(visualTime.timeToNearest(pulse: .bar, at: time, direction: .forward) == barDuration - time)
-            #expect(visualTime.timeToNearest(pulse: .bar, at: time, direction: .backward) == -time)
-
-            #expect(visualTime.timeToNearest(pulse: .subdivision, at: time, direction: .forward) == subdivisionDuration)
-            #expect(visualTime.timeToNearest(pulse: .subdivision, at: time, direction: .backward) == -subdivisionDuration)
-        }
+        #expect(VisualMusicalTime(pixelsPerSecond: 144.33333333333334, tempo: 60.0, timeSignature: try TimeSignature(numerator: 4, denominator: 4)).timeToNearest(pulse: .quarter, at: time, direction: .backward) == -1.0)
     }
 
-    @Test func timeToNearest2() throws {
-//        #expect(MusicalMeasure.Pulse.bar.duration(timeSignature: ._4_4, tempo: 60) == 4)
-//        #expect(Pulse.beat.duration(timeSignature: ._4_4, tempo: 60) == 1)
-//        #expect(Pulse.subdivision.duration(timeSignature: ._4_4, tempo: 60) == 0.25)
-//
-//        #expect(Pulse.bar.duration(timeSignature: ._4_4, tempo: 120) == 2)
-//        #expect(Pulse.beat.duration(timeSignature: ._4_4, tempo: 120) == 0.5)
-//        #expect(Pulse.subdivision.duration(timeSignature: ._4_4, tempo: 120) == 0.125)
+    @Test func timeToNearest_nearZero() throws {
+        let expected = VisualMusicalTime(
+            pixelsPerSecond: 185.66923647278477,
+            tempo: 77.0,
+            timeSignature: try TimeSignature(numerator: 4, denominator: 4)
+        ).timeToNearest(
+            pulse: .quarter,
+            at: 4.675324675324676,
+            direction: .backward
+        )
+
+        #expect(expected == -0.7792207792207793)
+
+        // timeTillNextPulse 4.440892098500626e-16
+        #expect(VisualMusicalTime(pixelsPerSecond: 185.66923647278477, tempo: 77.0, timeSignature: try TimeSignature(numerator: 4, denominator: 4)).timeToNearest(pulse: .quarter, at: 2.337662337662338, direction: .forward) == 0.7792207792207793)
+
+        // timeTillNextPulse 0.9999999999999991
+        #expect(VisualMusicalTime(pixelsPerSecond: 185.66923647278477, tempo: 77.0, timeSignature: try TimeSignature(numerator: 4, denominator: 4)).timeToNearest(pulse: .quarter, at: 4.675324675324675, direction: .forward) == 0.7792207792207793)
+    }
+
+    @Test func timeToNearest_partials() throws {
+        // timeTillNextPulse 0.8884869370669746
+        #expect(VisualMusicalTime(pixelsPerSecond: 144.33333333333334, tempo: 60.0, timeSignature: try TimeSignature(numerator: 4, denominator: 4)).timeToNearest(pulse: .quarter, at: 0.8884869370669746, direction: .forward) == 0.11151306293302543)
+
+        #expect(VisualMusicalTime(pixelsPerSecond: 144.33333333333334, tempo: 60.0, timeSignature: try TimeSignature(numerator: 4, denominator: 4)).timeToNearest(pulse: .quarter, at: 1.162736359699769, direction: .forward) == 0.8372636403002309)
+
+        #expect(VisualMusicalTime(pixelsPerSecond: 144.33333333333334, tempo: 60.0, timeSignature: try TimeSignature(numerator: 4, denominator: 4)).timeToNearest(pulse: .quarter, at: 1.6173769486143186, direction: .backward) == -0.6173769486143186)
+
+        #expect(VisualMusicalTime(pixelsPerSecond: 144.33333333333334, tempo: 60.0, timeSignature: try TimeSignature(numerator: 4, denominator: 4)).timeToNearest(pulse: .quarter, at: 7.35204063221709, direction: .forward) == 0.6479593677829101)
     }
 }

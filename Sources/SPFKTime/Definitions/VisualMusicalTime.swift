@@ -1,4 +1,5 @@
 import Foundation
+import Numerics
 import SPFKUtils
 
 /// Information for drawing a musical measure on screen
@@ -51,8 +52,7 @@ public struct VisualMusicalTime: Equatable, Codable {
         timeSignature: TimeSignature? = nil
     ) {
         self.pixelsPerSecond = pixelsPerSecond
-        
-        
+
         self.timeSignature = timeSignature
         self.tempo = tempo
 
@@ -104,7 +104,10 @@ public struct VisualMusicalTime: Equatable, Codable {
 
         var timeTillNextPulse = (currentTime / timeOfOnePulse).truncatingRemainder(dividingBy: 1)
 
-        if timeTillNextPulse == 0 {
+        let nearOne = timeTillNextPulse.isApproximatelyEqual(to: 1, absoluteTolerance: 0.0001)
+        let nearZero = timeTillNextPulse.isApproximatelyEqual(to: 0, absoluteTolerance: 0.001)
+
+        if nearZero || nearOne {
             timeTillNextPulse = timeOfOnePulse
         }
 
@@ -130,5 +133,13 @@ public struct VisualMusicalTime: Equatable, Codable {
         direction: MovementDirection
     ) -> TimeInterval? {
         timeToNearest(pulse: nil, at: currentTime, direction: direction)
+    }
+}
+
+extension VisualMusicalTime: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        """
+        VisualMusicalTime(pixelsPerSecond: \(pixelsPerSecond), tempo: \(tempo?.string ?? "nil"), timeSignature: \(timeSignature?.debugDescription ?? "nil"))
+        """
     }
 }

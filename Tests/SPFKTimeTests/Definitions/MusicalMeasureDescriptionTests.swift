@@ -37,9 +37,9 @@ struct MusicalMeasureDescriptionTests {
         #expect(_3_4.duration(pulse: .bar) == 3)
         #expect(_6_8.duration(pulse: .bar) == 3)
         #expect(_12_16.duration(pulse: .bar) == 3)
-        #expect(_3_4.duration(pulse: .beat) == 1)
-        #expect(_6_8.duration(pulse: .beat) == 1)
-        #expect(_12_16.duration(pulse: .beat) == 1)
+        #expect(_3_4.duration(pulse: .quarter) == 1)
+        #expect(_6_8.duration(pulse: .quarter) == 1)
+        #expect(_12_16.duration(pulse: .quarter) == 1)
 
         let _4_4 = MusicalMeasureDescription(timeSignature: ._4_4, tempo: 60)
         let _8_8 = MusicalMeasureDescription(timeSignature: ._8_8, tempo: 60)
