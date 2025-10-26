@@ -1,4 +1,3 @@
-//  Copyright © 2022 Audio Design Desk. All rights reserved.
 
 import CoreMedia
 

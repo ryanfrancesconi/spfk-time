@@ -1,4 +1,3 @@
-//  Copyright © 2021 Audio Design Desk. All rights reserved.
 
 import CoreMedia
 import TimecodeKit

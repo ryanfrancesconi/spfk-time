@@ -53,10 +53,3 @@ extension MusicalPulseDescription: CustomDebugStringConvertible {
         "#expect(MusicalPulseDescription(time: \(seconds)).stringValue == \"\(stringValue)\")"
     }
 }
-
-public enum MusicalPulse: String, Equatable, Codable, Hashable {
-    case bar
-    case quarter
-    case eighth
-    case sixteenth
-}

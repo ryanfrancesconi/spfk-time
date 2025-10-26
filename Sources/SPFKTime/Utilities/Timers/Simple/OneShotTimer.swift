@@ -34,7 +34,7 @@ public class OneShotTimer: TimerModel {
                 eventHandler: (() -> Void)? = nil) {
         self.timeInterval = timeInterval
 
-        queue = DispatchQueue(label: "com.audiodesigndesk.ADD.OneShotTimer",
+        queue = DispatchQueue(label: "com.spongefork.OneShotTimer",
                               qos: qos,
                               target: .global())
 
