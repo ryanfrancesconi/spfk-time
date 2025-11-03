@@ -469,7 +469,7 @@ class RealTimeDomainStaticStringTests {
 //  MARK: - Parse
 
 extension RealTimeDomainStaticStringTests {
-    @Test func testParseString() {
+    @Test func testParseString1() {
         #expect(
             RealTimeDomain.parse(string: "30") ==
                 30
@@ -500,15 +500,29 @@ extension RealTimeDomainStaticStringTests {
                 1830.5
         )
 
+        // 108000 = 30 hours
+        #expect(
+            RealTimeDomain.parse(string: "30:30:30.50") ==
+                109830.5
+        )
+    }
+
+    @Test func testParseString2() {
+        #expect(
+            RealTimeDomain.parse(string: "Hi 4.5 qwerty") ==
+                4.5
+        )
+    }
+
+    @Test func parseMinus() {
         #expect(
             RealTimeDomain.parse(string: "-30:30.50") ==
                 -1830.5
         )
 
-        // 108000 = 30 hours
         #expect(
-            RealTimeDomain.parse(string: "30:30:30.50") ==
-                109830.5
+            RealTimeDomain.parse(string: "-3") ==
+                -3
         )
     }
 }

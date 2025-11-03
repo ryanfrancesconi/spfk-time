@@ -54,34 +54,50 @@ extension RealTimeDomain {
     /// - Parameter string: an input string such as 00:30.50
     /// - Returns: a `TimeInterval` or `nil` if the parse failed
     public static func parse(string: String) -> TimeInterval? {
-        var string = string
+        let allowedChars = "0123456789:;.-"
 
-        let sign: Double = string.first == "-" ? -1 : 1
+        var string = string.filter {
+            allowedChars.contains($0)
+        }
 
-        if sign == -1 {
+        let sign: FloatingPointSign = string.first == "-" ? .minus : .plus
+
+        if sign == .minus {
             string = string.dropFirst().string
         }
 
-        guard string.contains(":") else {
-            return TimeInterval(string) // assume 1.1234 fractional seconds
+        let delimiters = [":", ";"]
+        let mult: Double = sign == .minus ? -1 : 1
+
+        for delimiter in delimiters {
+            let components = string.components(separatedBy: delimiter)
+
+            if components.count >= 2 {
+                return parse(mult: mult, components: components)
+            }
         }
 
-        let components = string.components(separatedBy: ":")
+        guard let value = TimeInterval(string) else {
+            return nil
+        }
 
+        return mult * value // assume 1.1234 fractional seconds
+    }
+
+    private static func parse(mult: Double, components: [String]) -> TimeInterval? {
         switch components.count {
         // hour 01:00:00.000
         case 3:
             let h = (components[0].double ?? 0) * 3600
             let m = (components[1].double ?? 0) * 60
             let s = (components[2].double ?? 0)
-
-            return sign * (h + m + s)
+            return mult * (h + m + s)
 
         // minutes 01:00.000
         case 2:
             let m = (components[0].double ?? 0) * 60
             let s = (components[1].double ?? 0)
-            return sign * (m + s)
+            return mult * (m + s)
 
         default:
             return nil

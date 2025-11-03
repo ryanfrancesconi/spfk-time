@@ -1,5 +1,5 @@
-import SPFKUtils
 import Foundation
+import SPFKUtils
 import TimecodeKit
 
 public extension Timecode {
@@ -32,12 +32,15 @@ public extension Timecode {
                     .map { String($0) }
             case 3:
                 guard string.count > frRateNumDigits else { return nil }
+
                 let frames = string.suffix(frRateNumDigits).string
                 let remainingRange = string.startIndex ... string.index(string.endIndex, offsetBy: -(frRateNumDigits + 1))
+
                 components = string[remainingRange]
                     .split(every: 2, backwards: true)
                     .map { String($0) }
                     + [frames]
+
             default:
                 Log.error("Encountered unhandled number of frames digits in timecode.")
                 return nil
