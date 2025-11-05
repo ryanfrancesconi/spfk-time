@@ -53,7 +53,7 @@ extension RealTimeDomain {
     /// Converts a time string (real time, not timecode) into seconds
     /// - Parameter string: an input string such as 00:30.50
     /// - Returns: a `TimeInterval` or `nil` if the parse failed
-    public static func parse(string: String) -> TimeInterval? {
+    public static func seconds(string: String) -> TimeInterval? {
         let allowedChars = "0123456789:;.-"
 
         var string = string.filter {
@@ -67,13 +67,13 @@ extension RealTimeDomain {
         }
 
         let delimiters = [":", ";"]
-        let mult: Double = sign == .minus ? -1 : 1
+        let signValue: Double = sign == .minus ? -1 : 1
 
         for delimiter in delimiters {
             let components = string.components(separatedBy: delimiter)
 
-            if components.count >= 2 {
-                return parse(mult: mult, components: components)
+            if components.count >= 2, let value = parse(components: components) {
+                return signValue * value
             }
         }
 
@@ -81,23 +81,23 @@ extension RealTimeDomain {
             return nil
         }
 
-        return mult * value // assume 1.1234 fractional seconds
+        return signValue * value // assume 1.1234 fractional seconds
     }
 
-    private static func parse(mult: Double, components: [String]) -> TimeInterval? {
+    private static func parse(components: [String]) -> TimeInterval? {
         switch components.count {
         // hour 01:00:00.000
         case 3:
             let h = (components[0].double ?? 0) * 3600
             let m = (components[1].double ?? 0) * 60
             let s = (components[2].double ?? 0)
-            return mult * (h + m + s)
+            return (h + m + s)
 
         // minutes 01:00.000
         case 2:
             let m = (components[0].double ?? 0) * 60
             let s = (components[1].double ?? 0)
-            return mult * (m + s)
+            return (m + s)
 
         default:
             return nil
