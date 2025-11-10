@@ -2,7 +2,7 @@ import Foundation
 
 /// Simple musical time signature.
 /// This doesn't support irrational or additive meters.
-public struct TimeSignature: Equatable, Hashable, Codable {
+public struct TimeSignature: Hashable, Codable {
     public static let _4_4: TimeSignature = {
         (try? TimeSignature(numerator: 4, denominator: 4))!
     }()
