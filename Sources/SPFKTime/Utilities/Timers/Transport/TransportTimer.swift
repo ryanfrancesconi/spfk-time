@@ -5,12 +5,6 @@ import SPFKUtils
 import TimecodeKit
 
 public class TransportTimer {
-    // HACK, 10 hours in the future to prevent underflow on freshly restarted macs who play deep into a timeline
-//    private static let futureShim: TimeInterval = 3600 * 10
-//    private static let hostTimeShim: UInt64 = futureShim.convertedToHostTime()
-
-    // MARK: - Stored Properties
-
     public var eventHandler: ((TransportTimerEvent) -> Void)?
 
     public private(set) var isPaused: Bool = false

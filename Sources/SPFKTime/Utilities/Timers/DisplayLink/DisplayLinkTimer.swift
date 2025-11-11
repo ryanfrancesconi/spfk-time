@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import QuartzCore
 import SPFKUtils
 
 @available(macOS 14, *)
