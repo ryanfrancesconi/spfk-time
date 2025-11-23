@@ -4,8 +4,7 @@ import QuartzCore
 import SPFKUtils
 
 @available(macOS 14, *)
-@MainActor
-public class DisplayLinkTimer: @preconcurrency TimerModel {
+public class DisplayLinkTimer: TimerModel {
     public var eventHandler: (() -> Void)?
 
     public var timeInterval: TimeInterval {
@@ -25,15 +24,15 @@ public class DisplayLinkTimer: @preconcurrency TimerModel {
 
     private var displayLink: CADisplayLink?
 
-    public init(on view: NSView) {
+    @MainActor public init(on view: NSView) {
         displayLink = view.displayLink(target: self, selector: #selector(handleUpdate))
     }
 
-    public init(window: NSWindow) {
+    @MainActor public init(window: NSWindow) {
         displayLink = window.displayLink(target: self, selector: #selector(handleUpdate))
     }
 
-    public init(screen: NSScreen) {
+    @MainActor public init(screen: NSScreen) {
         displayLink = screen.displayLink(target: self, selector: #selector(handleUpdate))
     }
 
