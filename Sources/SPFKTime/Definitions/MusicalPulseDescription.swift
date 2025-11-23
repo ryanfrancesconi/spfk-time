@@ -1,7 +1,7 @@
 import Foundation
 import SPFKUtils
 
-public struct MusicalPulseDescription: Hashable, Codable {
+public struct MusicalPulseDescription: Hashable, Codable, Sendable {
     public var measure = MusicalMeasureDescription(timeSignature: ._4_4, tempo: 120)
 
     /// used in transport display

@@ -1,7 +1,7 @@
 import Foundation
 import SPFKUtils
 
-public struct MusicalMeasureDescription: Equatable, Codable, Hashable {
+public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable {
     public static let tempoRange: ClosedRange<Double> = 1 ... 1024
 
     public var timeSignature: TimeSignature {
