@@ -21,7 +21,7 @@ extension TimelineDrawable {
 }
 
 extension TimelineDrawable where Self: NSView {
-    public func eventToTime(_ event: NSEvent) -> TimeInterval {
+    @MainActor public func eventToTime(_ event: NSEvent) -> TimeInterval {
         var svLocation = convert(event.locationInWindow, from: nil)
         svLocation.x = max(0, svLocation.x)
 

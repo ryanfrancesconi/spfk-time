@@ -12,15 +12,18 @@ public class TransportTimer {
     /// The current position of the playhead in fractional seconds
     /// This is  real time seconds. Can only be set when the timer isn't running.
     public var currentTime: TimeInterval = 0
+
     private var resumeTask: Task<Void, Error>?
+
     private var avStartTime = AVAudioTime.now()
+
     private var lastStoredHostTime: UInt64 = 0
 
-    private var internalTimer: TimerModel
+    private let internalTimer: TimerModel
 
     // MARK: - Init
 
-    public init(on view: NSView) {
+    @MainActor public init(on view: NSView) {
         defer {
             internalTimer.eventHandler = handleTimerUpdateEvent
         }
@@ -33,7 +36,7 @@ public class TransportTimer {
         internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
     }
 
-    public init(on window: NSWindow) {
+    @MainActor public init(on window: NSWindow) {
         defer {
             internalTimer.eventHandler = handleTimerUpdateEvent
         }
@@ -46,7 +49,7 @@ public class TransportTimer {
         internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
     }
 
-    public init(screen: NSScreen? = NSScreen.screens.first) throws {
+    @MainActor public init(screen: NSScreen? = NSScreen.screens.first) throws {
         guard let screen else {
             throw NSError(description: "Failed to get NSScreen for display link")
         }
@@ -130,28 +133,11 @@ public class TransportTimer {
         send(event: .state(.pause))
     }
 
-    public func resume(withTimeInterval: TimeInterval = 0.1) {
+    public func resume() {
         guard isPaused else { return }
-
-        guard withTimeInterval > 0 else {
-            isPaused = false
-            send(event: .state(.resume))
-            return
-        }
-
-        let withTimeInterval = max(0.1, withTimeInterval)
-
-        resumeTask?.cancel()
-        resumeTask = Task<Void, Error> {
-            try await Task.sleep(seconds: withTimeInterval)
-            try Task.checkCancellation()
-
-            Task { @MainActor in
-                self.isPaused = false
-                self.start(at: currentTime)
-                self.send(event: .state(.resume))
-            }
-        }
+        isPaused = false
+        self.start(at: currentTime)
+        send(event: .state(.resume))
     }
 }
 

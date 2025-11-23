@@ -80,7 +80,7 @@ public struct TimecodeDomain {
 
     // MARK: - Frame Rate
 
-    public static var defaultFrameRate: TimecodeFrameRate = .fps24
+    public static let defaultFrameRate: TimecodeFrameRate = .fps24
 
     /// Internal: Set frame rate.
     /// Returns `true` if the frame rate was successfully set and master timecode was updated to reflect the new frame rate.
