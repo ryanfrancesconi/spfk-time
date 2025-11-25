@@ -7,7 +7,7 @@ import Foundation
 private let name: String = "SPFKTime" // Swift target
 private let dependencyNames: [String] = ["SPFKBase", "SPFKUtils", "SPFKTesting"]
 private let dependencyBranch = "main"
-private let useLocalDependencies: Bool = true
+private let useLocalDependencies: Bool = false
 private let platforms: [PackageDescription.SupportedPlatform]? = [
     .macOS(.v12),
     .iOS(.v15),
