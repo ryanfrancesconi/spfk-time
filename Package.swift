@@ -1,7 +1,6 @@
 // swift-tools-version: 6.2.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
-import Foundation
 import PackageDescription
 
 private let name: String = "SPFKTime" // Swift target
@@ -38,7 +37,7 @@ private let products: [PackageDescription.Product] = [
 private var packageDependencies: [PackageDescription.Package.Dependency] {
     let local: [PackageDescription.Package.Dependency] =
         dependencyNames.map {
-            .package(name: "\($0)", path: "../\($0)") // assumes the package garden is in one folder
+            .package(name: "\($0)", path: "../\($0)")
         }
 
     let remote: [PackageDescription.Package.Dependency] =
@@ -47,11 +46,7 @@ private var packageDependencies: [PackageDescription.Package.Dependency] {
         }
 
     var value = useLocalDependencies ? local : remote
-
-    if !remoteDependencies.isEmpty {
-        value.append(contentsOf: remoteDependencies.map { $0.package })
-    }
-
+    value.append(contentsOf: remoteDependencies.map { $0.package })
     return value
 }
 
@@ -62,9 +57,7 @@ private var swiftTargetDependencies: [PackageDescription.Target.Dependency] {
         .byNameItem(name: "\($0)", condition: nil)
     }
 
-    if !remoteDependencies.isEmpty {
-        value.append(contentsOf: remoteDependencies.map { $0.product })
-    }
+    value.append(contentsOf: remoteDependencies.map { $0.product })
 
     return value
 }
