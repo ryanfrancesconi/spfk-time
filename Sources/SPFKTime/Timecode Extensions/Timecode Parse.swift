@@ -2,9 +2,9 @@ import Foundation
 import SPFKUtils
 import TimecodeKit
 
-public extension Timecode {
+extension Timecode {
     /// treats : ; . as delimiters
-    static func parseUnformattedTimecode(
+    public static func parseUnformattedTimecode(
         string: String,
         frameRate: TimecodeFrameRate
     ) -> Timecode.Components? {
@@ -16,7 +16,8 @@ public extension Timecode {
         let components: [String]
 
         if containsDelimiters ||
-            (!containsDelimiters && string.count <= frameRate.numberOfDigits) {
+            (!containsDelimiters && string.count <= frameRate.numberOfDigits)
+        {
             // process as delimited shorthand
             components = string.components(separatedBy: delimiters)
 
@@ -30,6 +31,7 @@ public extension Timecode {
                 components = string
                     .split(every: 2, backwards: true)
                     .map { String($0) }
+
             case 3:
                 guard string.count > frRateNumDigits else { return nil }
 

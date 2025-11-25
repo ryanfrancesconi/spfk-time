@@ -1,9 +1,9 @@
 import CoreMedia
 import TimecodeKit
 
-public extension Timecode {
+extension Timecode {
     /// Round down to the frame is subFrames is > 0
-    var roundedValue: Timecode {
+    public var roundedValue: Timecode {
         guard subFrames > 0 else { return self }
 
         var newValue = self
@@ -21,13 +21,13 @@ public extension Timecode {
     }
 
     /// This `Timecode` expressed as a `CMTime` object
-    var cmTime: CMTime {
+    public var cmTime: CMTime {
         CMTime(seconds: realTimeValue,
                preferredTimescale: frameRate.frameDurationCMTime.timescale)
     }
 
     /// Convenience to return a 0:00 timecode at the frame rate
-    var zero: Timecode {
+    public var zero: Timecode {
         .init(.zero, at: frameRate)
     }
 }
