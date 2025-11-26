@@ -46,7 +46,6 @@ public class DisplayLink {
                _: CVOptionFlags,
                _: UnsafeMutablePointer<CVOptionFlags>,
                sourceUnsafeRaw: UnsafeMutableRawPointer?) -> CVReturn in
-
                     // Un-opaque the source
                     if let sourceUnsafeRaw {
                         // Update the value of the source, thus, triggering a handle call on the timer
@@ -84,9 +83,9 @@ public class DisplayLink {
             return
         }
 
-        let err = CVDisplayLinkStart(displaylink)
+        let status = CVDisplayLinkStart(displaylink)
 
-        guard err == kCVReturnSuccess else {
+        guard status == kCVReturnSuccess else {
             Log.error("Failed to start timer")
             return
         }
@@ -101,9 +100,9 @@ public class DisplayLink {
             return
         }
 
-        let err = CVDisplayLinkStop(displaylink)
+        let status = CVDisplayLinkStop(displaylink)
 
-        guard err == kCVReturnSuccess else {
+        guard status == kCVReturnSuccess else {
             Log.error("Failed to stop timer")
             return
         }
@@ -117,9 +116,9 @@ public class DisplayLink {
             return
         }
 
-        let err = CVDisplayLinkStop(displaylink)
+        let status = CVDisplayLinkStop(displaylink)
 
-        guard err == kCVReturnSuccess else {
+        guard status == kCVReturnSuccess else {
             Log.error("Failed to stop timer")
             return
         }
