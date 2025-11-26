@@ -1,5 +1,5 @@
 import Foundation
-import OTCore
+import SwiftExtensions
 
 extension RealTimeDomain {
     /// Converts seconds into a time string (real time, not timecode).

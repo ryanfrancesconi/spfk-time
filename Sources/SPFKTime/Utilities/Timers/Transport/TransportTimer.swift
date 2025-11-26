@@ -1,6 +1,6 @@
 import AppKit
 import AVFoundation
-import OTCore
+import SwiftExtensions
 import SPFKUtils
 import TimecodeKit
 

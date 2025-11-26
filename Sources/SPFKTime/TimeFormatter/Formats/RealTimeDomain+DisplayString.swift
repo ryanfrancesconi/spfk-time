@@ -1,5 +1,5 @@
 import Foundation
-import OTCore
+import SwiftExtensions
 
 extension RealTimeDomain {
     /// Used to generate and store different real-time duration strings for use in dynamic UI display such as Library browser tree duration label and search results table Duration column.
