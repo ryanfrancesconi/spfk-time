@@ -2,7 +2,7 @@ import AppKit
 import AVFoundation
 import SwiftExtensions
 import SPFKUtils
-import TimecodeKit
+import SwiftTimecode
 
 public class TransportTimer {
     public var eventHandler: ((TransportTimerEvent) -> Void)?

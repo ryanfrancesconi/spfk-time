@@ -1,6 +1,6 @@
 import Foundation
 import SPFKUtils
-import TimecodeKit
+import SwiftTimecode
 
 extension Timecode {
     /// treats : ; . as delimiters

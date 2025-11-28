@@ -1,5 +1,5 @@
 import CoreMedia
-import TimecodeKit
+import SwiftTimecode
 
 extension Timecode {
     /// Round down to the frame is subFrames is > 0

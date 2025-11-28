@@ -1,6 +1,6 @@
 
 import CoreMedia
-import TimecodeKit
+import SwiftTimecode
 
 // MARK: - Time Conversions for FCPXML
 

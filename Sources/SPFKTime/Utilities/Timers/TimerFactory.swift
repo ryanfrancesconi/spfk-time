@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
 import SPFKUtils
-import TimecodeKit
+import SwiftTimecode
 
 // https://developer.apple.com/library/archive/qa/qa1385/_index.html
 

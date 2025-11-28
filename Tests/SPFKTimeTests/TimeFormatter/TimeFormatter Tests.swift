@@ -2,7 +2,7 @@
 import Numerics
 @testable import SPFKTime
 import Testing
-import TimecodeKit
+import SwiftTimecode
 
 struct TimeFormatterTests {
     // MARK: - Update Methods

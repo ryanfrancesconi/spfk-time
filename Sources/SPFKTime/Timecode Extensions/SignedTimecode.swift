@@ -1,4 +1,4 @@
-import TimecodeKit
+import SwiftTimecode
 
 /// Type wrapping `Timecode` that supports signed (positive or negative) timecode string expression.
 public struct SignedTimecode {

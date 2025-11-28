@@ -1,7 +1,7 @@
 @testable import SPFKTime
 import SPFKUtils
 import Testing
-import TimecodeKit
+import SwiftTimecode
 
 final class TimerTests {
     @Test func testTypeEquatable() {

@@ -1,7 +1,7 @@
 
 import SPFKTime
 import Testing
-import TimecodeKit
+import SwiftTimecode
 
 class SignedTimecodeTests {
     @Test func testStringValue_Positive() throws {

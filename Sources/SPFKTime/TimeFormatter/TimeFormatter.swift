@@ -1,6 +1,6 @@
 
 import Foundation
-import TimecodeKit
+import SwiftTimecode
 
 /// An object that manages time display.
 ///

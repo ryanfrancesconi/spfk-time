@@ -1,5 +1,5 @@
 import Foundation
-import TimecodeKit
+import SwiftTimecode
 
 extension TimecodeFrameRate {
     public init?(fps: Float, interlaced: Bool = false) {

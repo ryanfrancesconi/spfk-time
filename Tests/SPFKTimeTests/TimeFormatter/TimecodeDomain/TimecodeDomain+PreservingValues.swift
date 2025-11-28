@@ -1,5 +1,5 @@
 @testable import SPFKTime
-import TimecodeKit
+import SwiftTimecode
 import Testing
 
 extension TimecodeDomainTests {

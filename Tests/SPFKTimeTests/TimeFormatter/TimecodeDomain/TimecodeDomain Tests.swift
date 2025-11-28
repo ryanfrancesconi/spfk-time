@@ -2,7 +2,7 @@
 @testable import SPFKTime
 import SPFKUtils
 import Testing
-import TimecodeKit
+import SwiftTimecode
 
 class TimecodeDomainTests {
     lazy var td: TimecodeDomain = {

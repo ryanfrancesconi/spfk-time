@@ -1,6 +1,6 @@
 
 import Foundation
-import TimecodeKit
+import SwiftTimecode
 
 /// How many subframes per frame.
 /// There is no industry standard; Pro Tools uses 100, Logic Pro and Cubase use 80.

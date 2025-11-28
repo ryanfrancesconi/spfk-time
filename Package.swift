@@ -13,8 +13,8 @@ private let platforms: [PackageDescription.SupportedPlatform]? = [
 ]
 
 let remoteDependencies: [RemoteDependency] = [
-    .init(package: .package(url: "https://github.com/orchetect/TimecodeKit", from: "2.0.11"),
-          product: .product(name: "TimecodeKit", package: "TimecodeKit"))
+    .init(package: .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
+          product: .product(name: "SwiftTimecode", package: "swift-timecode"))
 ]
 
 // MARK: - Reusable Code for a Swift package

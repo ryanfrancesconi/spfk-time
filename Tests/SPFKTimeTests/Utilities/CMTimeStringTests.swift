@@ -4,7 +4,7 @@ import Numerics
 import SPFKTime
 import SPFKUtils
 import Testing
-import TimecodeKit
+import SwiftTimecode
 
 class CMTimeStringTests {
     @Test func testCMTimeParser() {
