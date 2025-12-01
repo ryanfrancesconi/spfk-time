@@ -3,7 +3,7 @@ import Foundation
 
 /// Identifies an UI object as having a concept of musical time vs pixels on screen, such as
 /// a timeline or audio drawn
-public protocol TimelineDrawable {
+@MainActor public protocol TimelineDrawable {
     var visualTime: VisualMusicalTime { get set }
 }
 

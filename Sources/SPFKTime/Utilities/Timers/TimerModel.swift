@@ -12,7 +12,7 @@ public protocol TimerModel: AnyObject {
     func resume()
 
     func suspend()
-    
+
     func dispose()
 }
 
