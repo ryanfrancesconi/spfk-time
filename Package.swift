@@ -4,34 +4,68 @@
 import PackageDescription
 
 let name: String = "SPFKTime" // Swift target
-let dependencyNames: [String] = ["SPFKBase", "SPFKUtils", "SPFKTesting"]
+var localDependencies: [RemoteDependency] { [
+    RemoteDependency(
+        package: .package(url: "\(githubBase)/SPFKBase", from: "0.0.1"),
+        product: .product(name: "SPFKBase", package: "SPFKBase")
+    ),
+
+    RemoteDependency(
+        package: .package(url: "\(githubBase)/SPFKUtils", from: "0.0.1"),
+        product: .product(name: "SPFKUtils", package: "SPFKUtils")
+    ),
+
+    RemoteDependency(
+        package: .package(url: "\(githubBase)/SPFKTesting", from: "0.0.1"),
+        product: .product(name: "SPFKTesting", package: "SPFKTesting")
+    ),
+] }
+
 let remoteDependencies: [RemoteDependency] = [
-    .init(package: .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
-          product: .product(name: "SwiftTimecode", package: "swift-timecode"))
+    .init(
+        package: .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
+        product: .product(name: "SwiftTimecode", package: "swift-timecode")
+    )
 ]
 let resources: [PackageDescription.Resource]? = nil
 
 let nameC: String? = nil
 let dependencyNamesC: [String] = []
 let remoteDependenciesC: [RemoteDependency] = []
-
+var cSettings: [PackageDescription.CSetting]? { [
+    .headerSearchPath("include_private")
+] }
+var cxxSettings: [PackageDescription.CXXSetting]? { [
+    .headerSearchPath("include_private")
+] }
 let platforms: [PackageDescription.SupportedPlatform]? = [
     .macOS(.v12),
-    .iOS(.v15)
+    .iOS(.v15),
 ]
 
-// MARK: - Reusable Code for a dual Swift + C package ---------------------------------------------------
+// MARK: - Reusable Code for a dual Swift + C package --------------------------------------------------
 
-let spfkVersion: Version = .init(0, 0, 1)
+let githubBase = "https://github.com/ryanfrancesconi"
 
 struct RemoteDependency {
     let package: PackageDescription.Package.Dependency
     let product: PackageDescription.Target.Dependency
 }
 
+var localDependencyNames: [String] {
+    localDependencies.compactMap {
+        switch $0.product {
+        case let .productItem(name: productName, package: _, moduleAliases: _, condition: _):
+            productName
+        default:
+            nil
+        }
+    }
+}
+
 var swiftTarget: PackageDescription.Target {
     var targetDependencies: [PackageDescription.Target.Dependency] {
-        let names = dependencyNames.filter { $0 != "SPFKTesting" }
+        let names = localDependencyNames.filter { $0 != "SPFKTesting" }
 
         var value: [PackageDescription.Target.Dependency] = names.map {
             .byNameItem(name: "\($0)", condition: nil)
@@ -63,7 +97,7 @@ var testTarget: PackageDescription.Target {
             array.append(.byNameItem(name: nameC, condition: nil))
         }
 
-        if dependencyNames.contains("SPFKTesting") {
+        if localDependencyNames.contains("SPFKTesting") {
             array.append(.byNameItem(name: "SPFKTesting", condition: nil))
         }
 
@@ -96,17 +130,12 @@ var cTarget: PackageDescription.Target? {
         return value
     }
 
-    // all spfk C targets have the same folder structure currently
     return .target(
         name: nameC,
         dependencies: targetDependencies,
         publicHeadersPath: "include",
-        cSettings: [
-            .headerSearchPath("include_private")
-        ],
-        cxxSettings: [
-            .headerSearchPath("include_private")
-        ]
+        cSettings: cSettings,
+        cxxSettings: cxxSettings
     )
 }
 
@@ -115,20 +144,7 @@ var targets: [PackageDescription.Target] {
 }
 
 var packageDependencies: [PackageDescription.Package.Dependency] {
-    var spfkDependencies: [RemoteDependency] {
-        let githubBase = "https://github.com/ryanfrancesconi"
-
-        // .when(configuration: .debug)
-
-        return dependencyNames.map {
-            RemoteDependency(
-                package: .package(url: "\(githubBase)/\($0)", from: spfkVersion),
-                product: .product(name: "\($0)", package: "\($0)")
-            )
-        }
-    }
-
-    return spfkDependencies.map(\.package) +
+    localDependencies.map(\.package) +
         remoteDependencies.map(\.package) +
         remoteDependenciesC.map(\.package)
 }
