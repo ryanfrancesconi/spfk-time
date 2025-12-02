@@ -3,85 +3,145 @@
 
 import PackageDescription
 
-private let name: String = "SPFKTime" // Swift target
-private let dependencyNames: [String] = ["SPFKBase", "SPFKUtils", "SPFKTesting"]
-private let dependencyBranch: String = "development"
-
-private let platforms: [PackageDescription.SupportedPlatform]? = [
-    .macOS(.v12),
-    .iOS(.v15)
-]
-
+let name: String = "SPFKTime" // Swift target
+let dependencyNames: [String] = ["SPFKBase", "SPFKUtils", "SPFKTesting"]
 let remoteDependencies: [RemoteDependency] = [
     .init(package: .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
           product: .product(name: "SwiftTimecode", package: "swift-timecode"))
 ]
+let resources: [PackageDescription.Resource]? = nil
 
-// MARK: - Reusable Code for a Swift package
+let nameC: String? = nil
+let dependencyNamesC: [String] = []
+let remoteDependenciesC: [RemoteDependency] = []
+
+let platforms: [PackageDescription.SupportedPlatform]? = [
+    .macOS(.v12),
+    .iOS(.v15)
+]
+
+// MARK: - Reusable Code for a dual Swift + C package ---------------------------------------------------
+
+let spfkVersion: Version = .init(0, 0, 1)
 
 struct RemoteDependency {
     let package: PackageDescription.Package.Dependency
     let product: PackageDescription.Target.Dependency
 }
 
-private let nameTests: String = "\(name)Tests" // Test target
-private let githubBase = "https://github.com/ryanfrancesconi"
+var swiftTarget: PackageDescription.Target {
+    var targetDependencies: [PackageDescription.Target.Dependency] {
+        let names = dependencyNames.filter { $0 != "SPFKTesting" }
 
-private let products: [PackageDescription.Product] = [
-    .library(
-        name: name,
-        targets: [name]
-    )
-]
-
-private let packageDependencies: [PackageDescription.Package.Dependency] = {
-    let value: [PackageDescription.Package.Dependency] =
-        dependencyNames.map {
-            .package(url: "\(githubBase)/\($0)", branch: dependencyBranch)
+        var value: [PackageDescription.Target.Dependency] = names.map {
+            .byNameItem(name: "\($0)", condition: nil)
         }
 
-    return value + remoteDependencies.map(\.package)
-}()
+        if let nameC {
+            value.append(.target(name: nameC))
+        }
 
-private var swiftTargetDependencies: [PackageDescription.Target.Dependency] {
-    let names = dependencyNames.filter { $0 != "SPFKTesting" }
+        value.append(contentsOf: remoteDependencies.map(\.product))
 
-    var value: [PackageDescription.Target.Dependency] = names.map {
-        .byNameItem(name: "\($0)", condition: nil)
+        return value
     }
 
-    value.append(contentsOf: remoteDependencies.map(\.product))
-
-    return value
+    return .target(
+        name: name,
+        dependencies: targetDependencies,
+        resources: resources
+    )
 }
 
-private let swiftTarget: PackageDescription.Target = .target(
-    name: name,
-    dependencies: swiftTargetDependencies,
-    resources: nil
-)
+var testTarget: PackageDescription.Target {
+    var targetDependencies: [PackageDescription.Target.Dependency] {
+        var array: [PackageDescription.Target.Dependency] = [
+            .byNameItem(name: name, condition: nil)
+        ]
 
-private var testTargetDependencies: [PackageDescription.Target.Dependency] {
-    var array: [PackageDescription.Target.Dependency] = [
-        .byNameItem(name: name, condition: nil)
+        if let nameC {
+            array.append(.byNameItem(name: nameC, condition: nil))
+        }
+
+        if dependencyNames.contains("SPFKTesting") {
+            array.append(.byNameItem(name: "SPFKTesting", condition: nil))
+        }
+
+        return array
+    }
+
+    let nameTests: String = "\(name)Tests" // Test target
+
+    return .testTarget(
+        name: nameTests,
+        dependencies: targetDependencies,
+        resources: nil,
+        swiftSettings: [
+            .swiftLanguageMode(.v5),
+            .unsafeFlags(["-strict-concurrency=complete"]),
+        ],
+    )
+}
+
+var cTarget: PackageDescription.Target? {
+    guard let nameC else { return nil }
+
+    var targetDependencies: [PackageDescription.Target.Dependency] {
+        var value: [PackageDescription.Target.Dependency] = dependencyNamesC.map {
+            .byNameItem(name: "\($0)", condition: nil)
+        }
+
+        value.append(contentsOf: remoteDependenciesC.map(\.product))
+
+        return value
+    }
+
+    // all spfk C targets have the same folder structure currently
+    return .target(
+        name: nameC,
+        dependencies: targetDependencies,
+        publicHeadersPath: "include",
+        cSettings: [
+            .headerSearchPath("include_private")
+        ],
+        cxxSettings: [
+            .headerSearchPath("include_private")
+        ]
+    )
+}
+
+var targets: [PackageDescription.Target] {
+    [swiftTarget, cTarget, testTarget].compactMap(\.self)
+}
+
+var packageDependencies: [PackageDescription.Package.Dependency] {
+    var spfkDependencies: [RemoteDependency] {
+        let githubBase = "https://github.com/ryanfrancesconi"
+
+        // .when(configuration: .debug)
+
+        return dependencyNames.map {
+            RemoteDependency(
+                package: .package(url: "\(githubBase)/\($0)", from: spfkVersion),
+                product: .product(name: "\($0)", package: "\($0)")
+            )
+        }
+    }
+
+    return spfkDependencies.map(\.package) +
+        remoteDependencies.map(\.package) +
+        remoteDependenciesC.map(\.package)
+}
+
+var products: [PackageDescription.Product] {
+    let targets: [String] = [name, nameC].compactMap(\.self)
+
+    return [
+        .library(name: name, targets: targets)
     ]
-
-    if dependencyNames.contains("SPFKTesting") {
-        array.append(.byNameItem(name: "SPFKTesting", condition: nil))
-    }
-
-    return array
 }
 
-private let testTarget: PackageDescription.Target = .testTarget(
-    name: nameTests,
-    dependencies: testTargetDependencies,
-    resources: nil
-)
-
-private let targets: [PackageDescription.Target] = [
-    swiftTarget, testTarget
-]
+// This is required to be at the bottom
 
 let package = Package(
     name: name,
