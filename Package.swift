@@ -21,8 +21,9 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/ryanfrancesconi/spfk-base", branch: "development"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-utils", branch: "development"),
-
         .package(url: "https://github.com/ryanfrancesconi/spfk-testing", branch: "development"),
+
+        .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
     ],
     targets: [
         .target(
@@ -30,6 +31,8 @@ let package = Package(
             dependencies: [
                 .product(name: "SPFKBase", package: "spfk-base"),
                 .product(name: "SPFKUtils", package: "spfk-utils"),
+
+                .product(name: "SwiftTimecode", package: "swift-timecode")
             ]
         ),
         .testTarget(
