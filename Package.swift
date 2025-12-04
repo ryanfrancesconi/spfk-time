@@ -5,27 +5,17 @@ import PackageDescription
 
 let name: String = "SPFKTime" // Swift target
 var localDependencies: [RemoteDependency] { [
-    RemoteDependency(
-        package: .package(url: "\(githubBase)/SPFKBase", from: "0.0.1"),
-        product: .product(name: "SPFKBase", package: "SPFKBase")
-    ),
-
-    RemoteDependency(
-        package: .package(url: "\(githubBase)/SPFKUtils", from: "0.0.1"),
-        product: .product(name: "SPFKUtils", package: "SPFKUtils")
-    ),
-
-    RemoteDependency(
-        package: .package(url: "\(githubBase)/SPFKTesting", from: "0.0.1"),
-        product: .product(name: "SPFKTesting", package: "SPFKTesting")
-    ),
+    .init(package: .package(url: "\(githubBase)/SPFKBase", from: "0.0.1"),
+          product: .product(name: "SPFKBase", package: "spfk-base")),
+    .init(package: .package(url: "\(githubBase)/SPFKUtils", from: "0.0.1"),
+          product: .product(name: "SPFKUtils", package: "spfk-utils")),
+    .init(package: .package(url: "\(githubBase)/SPFKTesting", from: "0.0.1"),
+          product: .product(name: "SPFKTesting", package: "spfk-testing")),
 ] }
 
 let remoteDependencies: [RemoteDependency] = [
-    .init(
-        package: .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
-        product: .product(name: "SwiftTimecode", package: "swift-timecode")
-    )
+    .init(package: .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
+          product: .product(name: "SwiftTimecode", package: "swift-timecode"))
 ]
 let resources: [PackageDescription.Resource]? = nil
 
