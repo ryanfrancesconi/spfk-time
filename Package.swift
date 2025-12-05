@@ -6,23 +6,17 @@ import PackageDescription
 let package = Package(
     name: "spfk-time",
     defaultLocalization: "en",
-    platforms: [
-        .macOS(.v12),
-        .iOS(.v15),
-    ],
+    platforms: [.macOS(.v12), .iOS(.v15),],
     products: [
         .library(
             name: "SPFKTime",
-            targets: [
-                "SPFKTime",
-            ]
+            targets: ["SPFKTime",]
         ),
     ],
     dependencies: [
         .package(url: "https://github.com/ryanfrancesconi/spfk-base", branch: "development"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-utils", branch: "development"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-testing", branch: "development"),
-
         .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
     ],
     targets: [
@@ -31,14 +25,13 @@ let package = Package(
             dependencies: [
                 .product(name: "SPFKBase", package: "spfk-base"),
                 .product(name: "SPFKUtils", package: "spfk-utils"),
-
                 .product(name: "SwiftTimecode", package: "swift-timecode")
             ]
         ),
         .testTarget(
             name: "SPFKTimeTests",
             dependencies: [
-                "SPFKTime",
+                .targetItem(name: "SPFKTime", condition: nil),
                 .product(name: "SPFKTesting", package: "spfk-testing"),
             ]
         ),
