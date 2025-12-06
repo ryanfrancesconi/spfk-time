@@ -3,7 +3,7 @@ import Numerics
 import SPFKUtils
 
 /// Information for drawing a musical measure on screen
-public struct VisualMusicalTime: Equatable, Codable {
+public struct VisualMusicalTime: Equatable, Codable, Sendable {
     public static let defaultTempo: Double = 120
 
     public static func == (lhs: VisualMusicalTime, rhs: VisualMusicalTime) -> Bool {

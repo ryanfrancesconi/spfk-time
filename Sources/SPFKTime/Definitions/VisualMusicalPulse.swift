@@ -1,7 +1,7 @@
 import Foundation
 import SPFKUtils
 
-public struct VisualMusicalPulse: Equatable, Codable {
+public struct VisualMusicalPulse: Equatable, Codable, Sendable {
     public private(set) var measure: MusicalMeasureDescription
 
     /// how many pixels in one second of time
