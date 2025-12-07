@@ -26,7 +26,8 @@ public class RepeatingTimer: TimerModel {
     public init(timeInterval: TimeInterval,
                 qos: DispatchQoS = .default,
                 leeway: Int = 100,
-                eventHandler: (() -> Void)? = nil) {
+                eventHandler: (() -> Void)? = nil)
+    {
         self.timeInterval = timeInterval
         self.leeway = leeway
 
@@ -80,8 +81,5 @@ public class RepeatingTimer: TimerModel {
          */
         resume()
         eventHandler = nil
-    }
-
-    deinit {
     }
 }
