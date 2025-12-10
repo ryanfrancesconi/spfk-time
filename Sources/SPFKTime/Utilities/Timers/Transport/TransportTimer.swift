@@ -73,7 +73,7 @@ public class TransportTimer {
     }
 
     deinit {
-        Log.debug("* { TransportTimer }")
+        Log.debug("- { \(self) }")
     }
 
     public func dispose() {

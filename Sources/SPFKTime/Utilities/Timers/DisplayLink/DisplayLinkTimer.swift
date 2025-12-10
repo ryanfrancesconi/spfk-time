@@ -68,6 +68,6 @@ public class DisplayLinkTimer: TimerModel {
     }
 
     deinit {
-        Log.debug("* { DisplayLinkTimer }")
+        Log.debug("- { \(self) }")
     }
 }

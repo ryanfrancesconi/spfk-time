@@ -41,7 +41,7 @@ public class LegacyDisplayLinkTimer: TimerModel {
     }
 
     deinit {
-        Log.debug("* { DisplayLinkLegacyTimer }")
+        Log.debug("- { \(self) }")
     }
 
     public func dispose() {

@@ -128,7 +128,7 @@ public class DisplayLink {
     }
 
     deinit {
-        Log.debug("* { DisplayLink }")
+        Log.debug("- { \(self) }")
 
         cancel()
         /*
