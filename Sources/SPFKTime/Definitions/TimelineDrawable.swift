@@ -29,3 +29,20 @@ extension TimelineDrawable where Self: NSView {
         return TimeInterval(svLocation.x) / pixelsPerSecond
     }
 }
+
+extension TimelineDrawable {
+    public func rectToTimeRange(_ rect: CGRect) throws -> ClosedRange<TimeInterval> {
+        guard rect.width > 0 else {
+            throw NSError(description: "Invalid rect \(rect)")
+        }
+
+        let x = rect.origin.x.double
+        let maxX = x + rect.width.double
+        let pixelsPerSecond = pixelsPerSecond
+
+        let startTime = x / pixelsPerSecond
+        let endTime = maxX / pixelsPerSecond
+
+        return startTime ... endTime
+    }
+}
