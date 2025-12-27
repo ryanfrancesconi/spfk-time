@@ -1,6 +1,7 @@
 import Foundation
-@testable import SPFKTime
 import Testing
+
+@testable import SPFKTime
 
 struct MusicalPulseDescriptionTests {
     @Test func timeToTestValue() {

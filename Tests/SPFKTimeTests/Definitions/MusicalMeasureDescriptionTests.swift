@@ -1,7 +1,8 @@
 import Foundation
-@testable import SPFKTime
 import SPFKUtils
 import Testing
+
+@testable import SPFKTime
 
 struct MusicalMeasureDescriptionTests {
     @Test func generateTests() throws {
@@ -121,10 +122,25 @@ extension MusicalMeasureDescriptionTests {
     }
 
     @Test func timeToNearest_partials() throws {
-        #expect(MusicalMeasureDescription.timeToNearest(pulse: .quarter, measure: MusicalMeasureDescription(timeSignature: try TimeSignature(numerator: 4, denominator: 4), tempo: 77.0), at: 0.7224288473856091, direction: .forward) == 0.0567919318351702)
+        #expect(
+            MusicalMeasureDescription.timeToNearest(
+                pulse: .quarter,
+                measure: MusicalMeasureDescription(
+                    timeSignature: try TimeSignature(numerator: 4, denominator: 4), tempo: 77.0),
+                at: 0.7224288473856091, direction: .forward) == 0.0567919318351702)
 
-        #expect(MusicalMeasureDescription.timeToNearest(pulse: .quarter, measure: MusicalMeasureDescription(timeSignature: try TimeSignature(numerator: 4, denominator: 4), tempo: 77.0), at: 1.0965821068039117, direction: .forward) == 0.4618594516376469)
+        #expect(
+            MusicalMeasureDescription.timeToNearest(
+                pulse: .quarter,
+                measure: MusicalMeasureDescription(
+                    timeSignature: try TimeSignature(numerator: 4, denominator: 4), tempo: 77.0),
+                at: 1.0965821068039117, direction: .forward) == 0.4618594516376469)
 
-        #expect(MusicalMeasureDescription.timeToNearest(pulse: .quarter, measure: MusicalMeasureDescription(timeSignature: try TimeSignature(numerator: 4, denominator: 4), tempo: 77.0), at: 5.156536292377851, direction: .backward) == -0.481211617053175)
+        #expect(
+            MusicalMeasureDescription.timeToNearest(
+                pulse: .quarter,
+                measure: MusicalMeasureDescription(
+                    timeSignature: try TimeSignature(numerator: 4, denominator: 4), tempo: 77.0), at: 5.156536292377851,
+                direction: .backward) == -0.481211617053175)
     }
 }

@@ -1,10 +1,9 @@
-
 import CoreMedia
 import Numerics
 import SPFKTime
 import SPFKUtils
-import Testing
 import SwiftTimecode
+import Testing
 
 class CMTimeStringTests {
     @Test func testCMTimeParser() {
@@ -48,8 +47,10 @@ class CMTimeStringTests {
         for frameRate in TimecodeFrameRate.allCases {
             var string = ""
 
-            if let value = CMTimeString.create(seconds: seconds,
-                                               frameRate: frameRate) {
+            if let value = CMTimeString.create(
+                seconds: seconds,
+                frameRate: frameRate)
+            {
                 string = value
             }
 
@@ -68,9 +69,11 @@ class CMTimeStringTests {
         for frameRate in TimecodeFrameRate.allCases {
             var string = ""
 
-            if let value = CMTimeString.create(seconds: seconds,
-                                               sampleRate: sampleRate,
-                                               frameRate: frameRate) {
+            if let value = CMTimeString.create(
+                seconds: seconds,
+                sampleRate: sampleRate,
+                frameRate: frameRate)
+            {
                 string = value
             }
 
@@ -91,7 +94,7 @@ class CMTimeStringTests {
 
         Log.debug(seconds, timecode.realTimeValue, timecode.stringValue, timecode.frameCount)
 
-        let timecode2 = try Timecode(.samples(5760000, sampleRate: 48000), at: .fps30d)
+        let timecode2 = try Timecode(.samples(5_760_000, sampleRate: 48000), at: .fps30d)
 
         Log.debug(seconds, timecode2.realTimeValue, timecode2.stringValue, timecode2.frameCount)
     }
