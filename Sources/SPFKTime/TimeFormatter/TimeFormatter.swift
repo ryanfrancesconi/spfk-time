@@ -1,5 +1,6 @@
 
 import Foundation
+import SPFKAudioBase
 import SwiftTimecode
 
 /// An object that manages time display.
@@ -28,10 +29,10 @@ extension TimeFormatter {
         let didSucceed = try? timecode.setTimecode(elapsedTime: elapsedTime)
 
         if didSucceed == true {
-            realTime.setSeconds(elapsedTime)
+            realTime.update(seconds: elapsedTime)
 
         } else {
-            realTime.setSeconds(timecode.calculateElapsedRealTime())
+            realTime.update(seconds: timecode.calculateElapsedRealTime())
         }
     }
 
@@ -44,7 +45,7 @@ extension TimeFormatter {
             clampPositionToStartTimecode: true
         )
 
-        realTime.setSeconds(timecode.calculateElapsedRealTime())
+        realTime.update(seconds: timecode.calculateElapsedRealTime())
     }
 
     /// Update timecode position from a timecode's equivalent real-time value for greater precision.
@@ -56,7 +57,7 @@ extension TimeFormatter {
             clampPositionToStartTimecode: true
         )
 
-        realTime.setSeconds(timecode.calculateElapsedRealTime())
+        realTime.update(seconds: timecode.calculateElapsedRealTime())
     }
 
     /// Update the start time (offset) for timecode domain.
@@ -104,14 +105,14 @@ extension TimeFormatter {
     public var primaryString: String {
         switch primaryDomain {
         case .realTime:
-            return realTime.string(showMilliseconds: true)
+            realTime.string(showMilliseconds: true)
 
         case .timecode:
-            return timecode.masterTimecode.stringValue()
+            timecode.masterTimecode.stringValue()
 
         // TODO:
         case .musical:
-            return ""
+            ""
         }
     }
 
@@ -119,18 +120,18 @@ extension TimeFormatter {
     public func primaryString(seconds: TimeInterval) -> String {
         switch primaryDomain {
         case .realTime:
-            return RealTimeDomain.string(
+            RealTimeDomain.string(
                 seconds: seconds,
                 showHours: .auto,
                 showMilliseconds: false
             )
 
         case .timecode:
-            return timecode.formNewTimecode(wrappingRealTimeSeconds: seconds).stringValue()
+            timecode.formNewTimecode(wrappingRealTimeSeconds: seconds).stringValue()
 
         // TODO:
         case .musical:
-            return ""
+            ""
         }
     }
 }
