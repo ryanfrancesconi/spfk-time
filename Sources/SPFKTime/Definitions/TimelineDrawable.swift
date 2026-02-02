@@ -22,10 +22,13 @@ extension TimelineDrawable {
 
 @MainActor
 extension TimelineDrawable where Self: NSView {
+    public var visualDuration: TimeInterval {
+        TimeInterval(frame.width) / visualTime.pixelsPerSecond
+    }
+
     public func eventToTime(_ event: NSEvent) -> TimeInterval {
         var svLocation = convert(event.locationInWindow, from: nil)
         svLocation.x = max(0, svLocation.x)
-
         return TimeInterval(svLocation.x) / pixelsPerSecond
     }
 }
