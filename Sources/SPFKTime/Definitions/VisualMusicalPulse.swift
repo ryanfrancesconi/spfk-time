@@ -19,7 +19,7 @@ public struct VisualMusicalPulse: Equatable, Codable, Sendable {
     private var pixelsPerBar: CGFloat
 
     public init(pixelsPerSecond: Double, measure: MusicalMeasureDescription) throws {
-        guard measure.tempo > 0 else {
+        guard measure.tempo.rawValue > 0 else {
             throw NSError(description: "tempo must be greater than zero")
         }
 

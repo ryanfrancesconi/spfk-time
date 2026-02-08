@@ -1,5 +1,6 @@
 import Foundation
 import Numerics
+import SPFKAudioBase
 import SPFKUtils
 
 /// Information for drawing a musical measure on screen
@@ -26,13 +27,13 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
         }
     }
 
-    private var _tempo: Double?
+    private var _tempo: Bpm?
 
     /// This will be clamped to a valid range
-    public var tempo: Double? {
+    public var tempo: Bpm? {
         get { _tempo }
         set {
-            _tempo = newValue?.clamped(to: MusicalMeasureDescription.tempoRange)
+            _tempo = newValue?.clamped(to: Bpm.tempoRange)
             update()
         }
     }
@@ -47,7 +48,7 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
 
     public init(
         pixelsPerSecond: Double = 30,
-        tempo: Double? = nil,
+        tempo: Bpm? = nil,
         timeSignature: TimeSignature? = nil
     ) {
         self.pixelsPerSecond = pixelsPerSecond
@@ -88,7 +89,7 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
 extension VisualMusicalTime: CustomDebugStringConvertible {
     public var debugDescription: String {
         """
-        VisualMusicalTime(pixelsPerSecond: \(pixelsPerSecond), tempo: \(tempo?.string ?? "nil"), timeSignature: \(timeSignature?.debugDescription ?? "nil"))
+        VisualMusicalTime(pixelsPerSecond: \(pixelsPerSecond), tempo: \(tempo?.stringValue ?? "nil"), timeSignature: \(timeSignature?.debugDescription ?? "nil"))
         """
     }
 }

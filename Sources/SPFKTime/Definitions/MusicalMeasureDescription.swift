@@ -1,16 +1,15 @@
 import Foundation
+import SPFKAudioBase
 import SPFKUtils
 
 public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable {
-    public static let tempoRange: ClosedRange<Double> = 1 ... 1024
-
     public var timeSignature: TimeSignature {
         didSet {
             update()
         }
     }
 
-    public var tempo: Double {
+    public var tempo: Bpm {
         didSet {
             update()
         }
@@ -18,16 +17,16 @@ public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable 
 
     public private(set) var barsPerSecond: TimeInterval = 0
 
-    public init(timeSignature: TimeSignature = ._4_4, tempo: Double) {
+    public init(timeSignature: TimeSignature = ._4_4, tempo: Bpm = ._60bpm) {
         self.timeSignature = timeSignature
-        self.tempo = tempo.clamped(to: Self.tempoRange)
+        self.tempo = tempo.clamped(to: Bpm.tempoRange)
         update()
     }
 
     private mutating func update() {
         durationValues.removeAll()
 
-        // recache these
+        // re-cache these
         for pulse in MusicalPulse.allCases {
             durationValues[pulse] = duration(pulse: pulse)
         }
@@ -44,7 +43,7 @@ public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable 
 
         var value: TimeInterval
 
-        let quarterNoteDuration = 60 / tempo
+        let quarterNoteDuration = tempo.quarterNoteDuration
 
         switch pulse {
         case .bar:
@@ -99,14 +98,12 @@ extension MusicalMeasureDescription {
             return timeTillNextPulse * direction.doubleValue
         }
 
-        var value: Double
-
-        switch direction {
+        let value: Double = switch direction {
         case .forward:
-            value = (1 - timeTillNextPulse) * timeOfOnePulse
+            (1 - timeTillNextPulse) * timeOfOnePulse
 
         case .backward:
-            value = timeTillNextPulse * timeOfOnePulse
+            timeTillNextPulse * timeOfOnePulse
         }
 
         return value * direction.doubleValue
@@ -123,7 +120,7 @@ extension MusicalMeasureDescription {
 extension MusicalMeasureDescription: CustomStringConvertible {
     public var description: String {
         """
-        MusicalMeasureDescription(timeSignature: \(timeSignature), tempo: \(tempo))
+        MusicalMeasureDescription(timeSignature: \(timeSignature), tempo: \(tempo.stringValue))
         """
     }
 }
