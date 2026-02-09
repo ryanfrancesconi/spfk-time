@@ -1,6 +1,6 @@
 import Foundation
 import SPFKAudioBase
-import SPFKUtils
+import SPFKBase
 
 public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable {
     public var timeSignature: TimeSignature {
