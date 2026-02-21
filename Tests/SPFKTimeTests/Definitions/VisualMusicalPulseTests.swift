@@ -1,14 +1,15 @@
-
 import Foundation
-@testable import SPFKTime
+import SPFKAudioBase
 import SPFKUtils
 import Testing
 
+@testable import SPFKTime
+
 struct VisualMusicalPulseTests {
     @Test func initValues() throws {
-        let measure30 = MusicalMeasureDescription(timeSignature: ._4_4, tempo: 30)
-        let measure60 = MusicalMeasureDescription(timeSignature: ._4_4, tempo: 60)
-        let measure120 = MusicalMeasureDescription(timeSignature: ._4_4, tempo: 120)
+        let measure30 = MusicalMeasureDescription(timeSignature: ._4_4, tempo: Bpm(30)!)
+        let measure60 = MusicalMeasureDescription(timeSignature: ._4_4, tempo: Bpm(60)!)
+        let measure120 = MusicalMeasureDescription(timeSignature: ._4_4, tempo: Bpm(120)!)
 
         let vmp = try VisualMusicalPulse(pixelsPerSecond: 60, measure: measure60)
         #expect(vmp.width(of: .bar) == 240)
