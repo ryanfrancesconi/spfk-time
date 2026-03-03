@@ -85,7 +85,7 @@ extension TimecodeFrameRate {
 extension TimecodeFrameRate {
     // nominal video rate
     public var floatValue: Float {
-        Float(rate.numerator / rate.denominator)
+        Float(rate.numerator) / Float(rate.denominator)
     }
 
     public var frameDurationInSeconds: TimeInterval {

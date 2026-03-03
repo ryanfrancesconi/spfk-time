@@ -130,12 +130,14 @@ public class DisplayLink {
     deinit {
         Log.debug("- { \(self) }")
 
-        cancel()
-        /*
-         If the timer is suspended, calling cancel without resuming
-         triggers a crash. This is documented here https://forums.developer.apple.com/thread/15902
-         */
-        start()
+        // If the timer is suspended, calling cancel without resuming
+        // triggers a crash. This is documented here https://forums.developer.apple.com/thread/15902
+        if !running {
+            source.resume()
+        }
+
+        CVDisplayLinkStop(displaylink)
+        source.cancel()
         callback = nil
     }
 }

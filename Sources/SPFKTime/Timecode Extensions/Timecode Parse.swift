@@ -60,7 +60,7 @@ extension Timecode {
             tcc.minutes = components[1].int ?? 0
             tcc.seconds = components[2].int ?? 0
             tcc.frames = components[3].int ?? 0
-            tcc.seconds = components[4].int ?? 0
+            tcc.subFrames = components[4].int ?? 0
 
         // 01:00:10:01
         case 4:

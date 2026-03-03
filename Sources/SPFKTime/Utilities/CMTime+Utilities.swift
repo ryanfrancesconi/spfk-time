@@ -7,8 +7,7 @@ extension CMTime {
     /// The CMTime value as a FCPXML time string using the format
     /// "[value]/[timescale]s" or "0s" if the value is zero.
     public var stringValue: String {
-        // TODO: Both CMTime and FCPXML allow for negative CMTime values; this should allow for it
-        guard value > 0 else {
+        guard value != 0 else {
             return "0s"
         }
         return "\(value)/\(timescale)s"
