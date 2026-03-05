@@ -1,4 +1,5 @@
-import AppKit
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
+
 import Foundation
 
 /// A UI element that maps between pixel coordinates and musical/real time.
@@ -25,21 +26,6 @@ extension TimelineDrawable {
     }
 }
 
-@MainActor
-extension TimelineDrawable where Self: NSView {
-    /// The time span visible across the view's width.
-    public var visualDuration: TimeInterval {
-        TimeInterval(frame.width) / visualTime.pixelsPerSecond
-    }
-
-    /// Converts a mouse event's x-position to a time value in seconds.
-    public func eventToTime(_ event: NSEvent) -> TimeInterval {
-        var svLocation = convert(event.locationInWindow, from: nil)
-        svLocation.x = max(0, svLocation.x)
-        return TimeInterval(svLocation.x) / pixelsPerSecond
-    }
-}
-
 extension TimelineDrawable {
     /// Converts a rectangle to a closed time range based on the current zoom level.
     public func rectToTimeRange(_ rect: CGRect) throws -> ClosedRange<TimeInterval> {
@@ -57,3 +43,23 @@ extension TimelineDrawable {
         return startTime ... endTime
     }
 }
+
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
+
+    import AppKit
+
+    @MainActor
+    extension TimelineDrawable where Self: NSView {
+        /// The time span visible across the view's width.
+        public var visualDuration: TimeInterval {
+            TimeInterval(frame.width) / visualTime.pixelsPerSecond
+        }
+
+        /// Converts a mouse event's x-position to a time value in seconds.
+        public func eventToTime(_ event: NSEvent) -> TimeInterval {
+            var svLocation = convert(event.locationInWindow, from: nil)
+            svLocation.x = max(0, svLocation.x)
+            return TimeInterval(svLocation.x) / pixelsPerSecond
+        }
+    }
+#endif

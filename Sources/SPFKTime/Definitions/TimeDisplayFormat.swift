@@ -1,3 +1,5 @@
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
+
 import Foundation
 
 /// Selects how a time value is rendered as a display string.

@@ -1,3 +1,5 @@
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
+
 import Foundation
 
 /// RepeatingTimer mimics the API of DispatchSourceTimer but in a way that prevents

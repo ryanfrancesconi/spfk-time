@@ -1,3 +1,5 @@
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
+
 import Foundation
 
 /// A repeating timer backed by `NSTimer`, scheduled on the main run loop in `.common` mode.

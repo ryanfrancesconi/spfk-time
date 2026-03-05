@@ -1,3 +1,5 @@
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
+
 import SwiftTimecode
 
 /// Type wrapping `Timecode` that supports signed (positive or negative) timecode string expression.

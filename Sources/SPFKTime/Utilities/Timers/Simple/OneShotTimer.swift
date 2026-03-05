@@ -1,3 +1,5 @@
+// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
+
 import Foundation
 
 /// A single-fire timer backed by `DispatchWorkItem`. Fires once after ``timeInterval`` seconds
