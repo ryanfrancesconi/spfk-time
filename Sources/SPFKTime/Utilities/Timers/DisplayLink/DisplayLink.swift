@@ -94,7 +94,7 @@ public class DisplayLink {
         running = true
     }
 
-    /// Suspends the timer, can be restarted aftewards
+    /// Suspends the timer, can be restarted afterwards
     public func suspend() {
         guard running else {
             return

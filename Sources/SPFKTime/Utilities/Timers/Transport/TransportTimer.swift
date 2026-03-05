@@ -4,20 +4,18 @@ import SwiftExtensions
 import SPFKUtils
 import SwiftTimecode
 
+/// Transport​Timer is a facade that wraps a platform-appropriate display link timer and bridges it
+/// to the audio synchronization domain via AVAudio​Time / mach​_absolute​_time.
 public class TransportTimer {
     public var eventHandler: ((TransportTimerEvent) -> Void)?
 
     public private(set) var isPaused: Bool = false
 
-    /// The current position of the playhead in fractional seconds
-    /// This is  real time seconds. Can only be set when the timer isn't running.
+    /// The current position of the playhead in fractional seconds.
+    /// This is real time seconds. Can only be set when the timer isn't running.
     public var currentTime: TimeInterval = 0
 
-    private var resumeTask: Task<Void, Error>?
-
     private var avStartTime = AVAudioTime.now()
-
-    private var lastStoredHostTime: UInt64 = 0
 
     private let internalTimer: TimerModel
 
@@ -82,9 +80,8 @@ public class TransportTimer {
     }
 
     /// Received event from the timer, called on the screen refresh rate
-    @objc
     private func handleTimerUpdateEvent() {
-        let avNow = AVAudioTime(hostTime: mach_absolute_time()) // + Self.hostTimeShim)
+        let avNow = AVAudioTime(hostTime: mach_absolute_time())
 
         // Find the difference between current time and start time.
         guard let elapsedTime = avNow.timeIntervalSince(otherTime: avStartTime) else {
@@ -107,13 +104,12 @@ public class TransportTimer {
 
         let hostTime = hostTime ?? mach_absolute_time()
 
-        let avTime = AVAudioTime(hostTime: hostTime).offset(seconds: -time) // + Self.futureShim)
+        let avTime = AVAudioTime(hostTime: hostTime).offset(seconds: -time)
         start(avTime: avTime)
     }
 
     public func start(avTime: AVAudioTime) {
         self.avStartTime = avTime
-        lastStoredHostTime = avTime.hostTime
 
         internalTimer.resume()
         send(event: .state(.start))
@@ -128,7 +124,8 @@ public class TransportTimer {
 
     public func pause() {
         guard isRunning else { return }
-        stop()
+
+        internalTimer.suspend()
         isPaused = true
         send(event: .state(.pause))
     }
@@ -136,7 +133,11 @@ public class TransportTimer {
     public func resume() {
         guard isPaused else { return }
         isPaused = false
-        self.start(at: currentTime)
+
+        let avTime = AVAudioTime(hostTime: mach_absolute_time()).offset(seconds: -currentTime)
+        self.avStartTime = avTime
+
+        internalTimer.resume()
         send(event: .state(.resume))
     }
 }
