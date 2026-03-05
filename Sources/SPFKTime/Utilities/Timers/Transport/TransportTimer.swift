@@ -70,6 +70,12 @@ public class TransportTimer {
         internalTimer.eventHandler = handleTimerUpdateEvent
     }
 
+    /// Internal initializer for testing with an injected timer
+    init(timer: TimerModel) {
+        internalTimer = timer
+        internalTimer.eventHandler = handleTimerUpdateEvent
+    }
+
     deinit {
         Log.debug("- { \(self) }")
     }
