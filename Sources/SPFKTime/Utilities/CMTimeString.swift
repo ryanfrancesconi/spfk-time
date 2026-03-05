@@ -4,10 +4,15 @@ import SwiftTimecode
 
 // MARK: - Time Conversions for FCPXML
 
+/// Utilities for converting between `CMTime` values and FCPXML time strings.
+///
+/// FCPXML uses the format `"[value]/[timescale]s"` (e.g. `"100/24s"`) to represent
+/// time values. When the timescale is 1, the format simplifies to `"[value]s"`.
 public enum CMTimeString {
-    /// Parse a fcpxml based string into a CMTime object
-    /// - Parameter string: String to parse, such as 5/24s
-    /// - Returns: `CMTime` or `nil`
+    /// Parses an FCPXML time string into a `CMTime`.
+    ///
+    /// - Parameter string: A string such as `"100/24s"` or `"0s"`.
+    /// - Returns: The parsed `CMTime`, or `nil` if the string is malformed.
     public static func parse(string: String) -> CMTime? {
         guard string != "0s" else {
             return .zero
@@ -39,6 +44,7 @@ public enum CMTimeString {
 // MARK: - Create a new CMTimeString from values
 
 extension CMTimeString {
+    /// Creates an FCPXML time string from a seconds value, converting through audio samples.
     public static func create(seconds: TimeInterval,
                               sampleRate: Double,
                               frameRate: TimecodeFrameRate) -> String? {
@@ -51,6 +57,7 @@ extension CMTimeString {
         return create(timecode: timecode)
     }
 
+    /// Creates an FCPXML time string from a seconds value at the given frame rate.
     public static func create(seconds: TimeInterval,
                               frameRate: TimecodeFrameRate) -> String? {
         guard let timecode = try? Timecode(.realTime(seconds: seconds),
@@ -60,6 +67,11 @@ extension CMTimeString {
         return create(timecode: timecode)
     }
 
+    /// Creates an FCPXML time string from a `Timecode` value.
+    ///
+    /// - Parameters:
+    ///   - timecode: The timecode to convert.
+    ///   - roundToFrame: If `true`, rounds up to the next frame before converting.
     public static func create(timecode: Timecode, roundToFrame: Bool = false) -> String {
         var timecode = timecode
 

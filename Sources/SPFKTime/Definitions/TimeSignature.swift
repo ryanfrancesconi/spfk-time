@@ -35,9 +35,18 @@ public struct TimeSignature: Hashable, Codable, Sendable {
         (try? TimeSignature(numerator: 1, denominator: 4))!
     }()
 
+    /// The number of beats per measure.
     public private(set) var numerator: Int
+
+    /// The note value that receives one beat (must be a power of two, e.g. 4 = quarter note).
     public private(set) var denominator: Int
 
+    /// Creates a time signature.
+    ///
+    /// - Parameters:
+    ///   - numerator: Beats per measure (must be > 0).
+    ///   - denominator: Note value per beat (must be a power of two ≥ 2).
+    /// - Throws: If the arguments are out of range.
     public init(numerator: Int, denominator: Int) throws {
         let isPowerOf2 = (denominator & (denominator - 1) == 0)
 

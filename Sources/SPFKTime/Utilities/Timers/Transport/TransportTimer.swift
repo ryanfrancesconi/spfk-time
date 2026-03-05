@@ -7,8 +7,10 @@ import SwiftTimecode
 /// Transport​Timer is a facade that wraps a platform-appropriate display link timer and bridges it
 /// to the audio synchronization domain via AVAudio​Time / mach​_absolute​_time.
 public class TransportTimer {
+    /// Closure receiving ``TransportTimerEvent`` values (state changes and time updates).
     public var eventHandler: ((TransportTimerEvent) -> Void)?
 
+    /// `true` when the transport is paused (position preserved for resume).
     public private(set) var isPaused: Bool = false
 
     /// The current position of the playhead in fractional seconds.
@@ -21,6 +23,7 @@ public class TransportTimer {
 
     // MARK: - Init
 
+    /// Creates a transport timer bound to the display containing the given view.
     @MainActor public init(on view: NSView) {
         defer {
             internalTimer.eventHandler = handleTimerUpdateEvent
@@ -34,6 +37,7 @@ public class TransportTimer {
         internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
     }
 
+    /// Creates a transport timer bound to the display containing the given window.
     @MainActor public init(on window: NSWindow) {
         defer {
             internalTimer.eventHandler = handleTimerUpdateEvent
@@ -47,6 +51,7 @@ public class TransportTimer {
         internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
     }
 
+    /// Creates a transport timer bound to the given screen.
     @MainActor public init(screen: NSScreen? = NSScreen.screens.first) throws {
         guard let screen else {
             throw NSError(description: "Failed to get NSScreen for display link")
@@ -80,6 +85,7 @@ public class TransportTimer {
         Log.debug("- { \(self) }")
     }
 
+    /// Permanently stops the timer and releases the event handler.
     public func dispose() {
         internalTimer.dispose()
         eventHandler = nil
@@ -99,6 +105,11 @@ public class TransportTimer {
         send(event: .time(elapsedTime))
     }
 
+    /// Starts playback, treating `time` as the initial elapsed position.
+    ///
+    /// - Parameters:
+    ///   - time: The initial elapsed time in seconds.
+    ///   - hostTime: Optional `mach_absolute_time` anchor; defaults to now.
     public func start(
         at time: TimeInterval,
         hostTime: UInt64? = nil
@@ -114,6 +125,7 @@ public class TransportTimer {
         start(avTime: avTime)
     }
 
+    /// Starts playback anchored to the given `AVAudioTime`.
     public func start(avTime: AVAudioTime) {
         self.avStartTime = avTime
 
@@ -121,6 +133,7 @@ public class TransportTimer {
         send(event: .state(.start))
     }
 
+    /// Stops playback and resets the transport. No-op if not running.
     public func stop() {
         guard isRunning else { return }
 
@@ -128,6 +141,7 @@ public class TransportTimer {
         send(event: .state(.stop))
     }
 
+    /// Pauses playback, preserving the current position for later resume.
     public func pause() {
         guard isRunning else { return }
 
@@ -136,6 +150,7 @@ public class TransportTimer {
         send(event: .state(.pause))
     }
 
+    /// Resumes playback from the paused position. No-op if not paused.
     public func resume() {
         guard isPaused else { return }
         isPaused = false
@@ -149,10 +164,12 @@ public class TransportTimer {
 }
 
 extension TransportTimer {
+    /// `true` when the display-link timer is actively firing.
     public var isRunning: Bool {
         internalTimer.state == .resumed
     }
 
+    /// The effective refresh rate of the underlying display-link timer.
     public var fps: Double {
         internalTimer.fps
     }

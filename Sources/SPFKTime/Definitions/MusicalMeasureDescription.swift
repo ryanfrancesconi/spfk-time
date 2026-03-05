@@ -2,21 +2,33 @@ import Foundation
 import SPFKAudioBase
 import SPFKBase
 
+/// Combines a tempo and time signature to compute pulse durations and bar rates.
+///
+/// Pulse durations are cached and recalculated whenever ``tempo`` or ``timeSignature``
+/// changes. Use ``duration(pulse:)`` to get the real-time length of any ``MusicalPulse``.
 public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable {
+    /// The time signature. Changing this recalculates all cached durations.
     public var timeSignature: TimeSignature {
         didSet {
             update()
         }
     }
 
+    /// The tempo in beats per minute. Changing this recalculates all cached durations.
     public var tempo: Bpm {
         didSet {
             update()
         }
     }
 
+    /// The number of bars that fit in one second at the current tempo and time signature.
     public private(set) var barsPerSecond: TimeInterval = 0
 
+    /// Creates a measure description.
+    ///
+    /// - Parameters:
+    ///   - timeSignature: The time signature (defaults to 4/4).
+    ///   - tempo: The tempo in BPM (defaults to 60, clamped to the valid range).
     public init(timeSignature: TimeSignature = ._4_4, tempo: Bpm = ._60bpm) {
         self.timeSignature = timeSignature
         self.tempo = tempo.clamped(to: Bpm.tempoRange)
@@ -36,6 +48,7 @@ public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable 
 
     private var durationValues = [MusicalPulse: TimeInterval]()
 
+    /// Returns the duration in seconds of the given pulse at the current tempo and time signature.
     public func duration(pulse: MusicalPulse) -> TimeInterval {
         if let value = durationValues[pulse] {
             return value
@@ -65,7 +78,7 @@ public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable 
 }
 
 extension MusicalMeasureDescription {
-    /// How far away in seconds is the next bar/beat/subdivision relative to currenTime passed in. Useful
+    /// How far away in seconds is the next bar/beat/subdivision relative to currentTime passed in. Useful
     /// for step controls where you want to snap to the next pulse type. The visualMeasure
     /// must be set or nil is returned.
     ///
@@ -109,6 +122,7 @@ extension MusicalMeasureDescription {
         return value * direction.doubleValue
     }
 
+    /// Convenience that calculates the distance to the nearest whole second boundary.
     public static func timeToNearestSecond(
         at currentTime: TimeInterval,
         direction: MovementDirection

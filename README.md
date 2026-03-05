@@ -14,94 +14,123 @@ SPFKTime provides three core capabilities:
 
 ### TimeFormatter
 
-Primary interface for managing time across domains. Wraps both a `TimecodeDomain` and real-time tracking, producing formatted strings for display.
+Primary interface for managing time across domains. Wraps both a `TimecodeDomain` and a `RealTimeDomain`, producing formatted strings for display based on the active `primaryDomain`.
 
 ```swift
-let formatter = TimeFormatter()
+var formatter = TimeFormatter(primaryDomain: .timecode)
 formatter.update(frameRate: .fps24)
 formatter.update(start: startTimecode)
 formatter.update(elapsedTime: 3.5)
-formatter.primaryString  // formatted time output
+formatter.primaryString  // "00:00:03:12" (at 24fps)
 ```
 
 ### TimecodeDomain
 
-Advanced timecode state management with frame rate conversion strategies, start timecode offsets, and subframe precision.
+Manages SMPTE timecode state including frame rate, start offset, and current position. Provides factory methods for creating `Timecode` values with consistent base settings and handles frame rate conversion with strategies matching Pro Tools (preserve values) and Cubase (convert values) behavior.
 
 ```swift
-let domain = TimecodeDomain(frameRate: .fps25)
-domain.update(elapsedTime: 10.0)
-domain.timecode  // current Timecode value
+let domain = TimecodeDomain()
 
-// Frame rate conversion preserving timecode values
-let converted = domain.formNewTimecode(
-    preservingValuesFrom: sourceTimecode,
-    at: .fps24
+// Create timecode values using factory methods
+let tc = domain.formNewTimecode(wrappingRealTimeSeconds: 10.0)
+let fromString = try domain.formNewTimecode(string: "01:00:00:00")
+
+// Frame rate conversion preserving timecode values (Pro Tools behavior)
+let preserved = try domain.formNewTimecode(
+    preservingValuesFrom: sourceTimecode
 )
-```
 
-### SignedTimecode
+// Frame rate conversion using real-time position (Cubase behavior)
+let converted = try domain.formNewTimecode(
+    convertingFrom: sourceTimecode
+)
 
-Wraps `Timecode` with an optional negative sign for values that can be offset from a reference point.
-
-```swift
-let signed = SignedTimecode(timecode: tc, sign: .minus)
-signed.stringValue  // "-01:00:00:00"
+// Signed timecode for offset display
+let signed = domain.formNewSignedTimecode(
+    seconds: -3.5,
+    offsetFromStart: true
+)
+signed.stringValue()  // "-00:00:03:12"
 ```
 
 ### Timecode Parsing
 
-Flexible timecode string parsing supporting multiple delimiter styles and shorthand entry.
+Flexible timecode string parsing supporting multiple delimiter styles and undelimited shorthand entry (right-to-left digit assignment).
 
 ```swift
-// Standard delimiters
+// Standard delimiters (: ; .)
 Timecode.parseUnformattedTimecode(string: "01:00:10:15", frameRate: .fps24)
+// -> h1 m0 s10 f15
 
 // Semicolons (drop-frame style)
 Timecode.parseUnformattedTimecode(string: "01;00;10;15", frameRate: .fps29_97d)
 
-// Undelimited shorthand (right-to-left)
+// Undelimited shorthand -- digits fill frames first, then right-to-left
 Timecode.parseUnformattedTimecode(string: "11015", frameRate: .fps24)
 // -> 00:01:10:15
+
+// Short entry
+Timecode.parseUnformattedTimecode(string: "1:1", frameRate: .fps24)
+// -> 00:00:01:01
 ```
 
 ### TransportTimer
 
-High-precision timer for media playback, synced to the display refresh rate via `CADisplayLink` (macOS 14+) or `CVDisplayLink` (legacy).
+Display-linked playback timer that bridges screen refresh to the audio sync domain via `AVAudioTime` / `mach_absolute_time`. Uses `CADisplayLink` on macOS 14+ with automatic `CVDisplayLink` fallback on earlier systems.
 
 ```swift
-let timer = TransportTimer()
+// Bind to a view's display
+let timer = TransportTimer(on: view)
+
 timer.eventHandler = { event in
     switch event {
-    case .state(let state): // .start, .stop, .pause, .resume
-    case .time(let seconds): // elapsed time update
-    case .complete: break
+    case .state(let playState):
+        print(playState.isPlaying)  // true for .start/.resume
+    case .time(let elapsed):
+        print(elapsed)  // seconds since start
+    case .complete:
+        break
     }
 }
-timer.start(at: 0.0)
-timer.pause()
-timer.resume()
-timer.stop()
+
+timer.start(at: 0.0)       // begin from 0s
+timer.pause()               // freeze position
+timer.resume()              // continue from paused position
+timer.stop()                // stop playback
+timer.currentTime           // last elapsed time
+timer.fps                   // display refresh rate
 ```
 
 ### Musical Time
 
-Types for tempo-aware musical time representation:
+Types for tempo-aware musical time representation, position tracking, and visual rendering.
 
 ```swift
-// Define a measure
+// Define a measure from tempo + time signature
 let measure = MusicalMeasureDescription(
-    tempo: Bpm(120),
-    timeSignature: .default  // 4/4
+    timeSignature: ._4_4,
+    tempo: Bpm(120)
 )
 measure.duration(pulse: .bar)       // 2.0 seconds
 measure.duration(pulse: .quarter)   // 0.5 seconds
+measure.barsPerSecond               // 0.5
 
-// Snap to nearest beat
-measure.timeToNearest(time: 1.3, pulse: .quarter)  // 1.5
+// Snap to nearest musical boundary
+let offset = MusicalMeasureDescription.timeToNearest(
+    pulse: .quarter,
+    measure: measure,
+    at: 1.3,
+    direction: .forward
+)
 
-// Visual rendering
-let visual = VisualMusicalPulse(
+// Musical position display (1-based bar/beat/subdivision)
+var position = MusicalPulseDescription()
+position.measure = measure
+position.update(time: 5.0)
+position.stringValue  // "3 1 1" (bar 3, beat 1, subdivision 1)
+
+// Pixel layout for timeline drawing
+let visual = try VisualMusicalPulse(
     pixelsPerSecond: 100,
     measure: measure
 )
@@ -109,63 +138,86 @@ visual.width(of: .bar)      // 200.0 pixels
 visual.width(of: .quarter)  // 50.0 pixels
 ```
 
+### Timer Factory
+
+General-purpose timers for non-transport use cases. All conform to the `TimerModel` protocol.
+
+```swift
+// Main-thread NSTimer
+let basic = TimerFactory.createTimer(.basic(timeInterval: 1.0 / 30))
+
+// Single-fire delayed execution
+let oneShot = TimerFactory.createTimer(.oneShot(timeInterval: 0.5))
+
+// Background repeating timer
+let repeating = TimerFactory.createTimer(
+    .repeating(timeInterval: TimerFactory.fps60, qos: .userInteractive)
+)
+
+repeating.eventHandler = { /* called each tick */ }
+repeating.resume()
+repeating.suspend()
+repeating.dispose()
+```
+
 ### CMTime Utilities
 
 FCPXML-compatible `CMTime` string formatting and parsing.
 
 ```swift
-// Format
-let time = CMTimeMake(value: 100, timescale: 24)
+// Format as FCPXML string
+let time = CMTime(value: 100, timescale: 24)
 time.stringValue  // "100/24s"
 
-// Parse
+// Parse from FCPXML string
 CMTimeString.parse(string: "100/24s")  // CMTime(value: 100, timescale: 24)
 
-// Create from timecode
-CMTimeString.create(timecode: tc)  // FCPXML time string
+// Create from timecode or seconds
+CMTimeString.create(timecode: tc)  // "3612/24s"
+CMTimeString.create(seconds: 10.0, frameRate: .fps24)
 ```
 
 ## Architecture
 
 ```
 Definitions/
-  ├── TimeSignature.swift             — Musical time signatures with validation
-  ├── MusicalPulse.swift              — Beat division enum (bar, quarter, eighth, sixteenth)
-  ├── MusicalPulseDescription.swift   — Musical position tracking (bar/beat/subdivision)
-  ├── MusicalMeasureDescription.swift — Tempo + time signature -> pulse durations
-  ├── VisualMusicalPulse.swift        — Pixel dimensions for musical elements
-  ├── VisualMusicalTime.swift         — Combined visual rendering parameters
-  ├── TimeDomain.swift                — Time domain enum (realTime, timecode, musical)
-  ├── TimeDisplayFormat.swift         — Display format enum (timecode, seconds)
-  ├── TimelineRulerDrawingScale.swift — Zoom-dependent ruler spacing
-  ├── TimelineRulerViewOptions.swift  — Timeline ruler display options
-  └── TimelineDrawable.swift          — Protocol for timeline-drawable elements
+  ├── TimeDomain                    — Time domain enum (realTime, timecode, musical)
+  ├── TimeDisplayFormat             — Display format choice (timecode vs seconds)
+  ├── TimeSignature                 — Musical time signatures with validation
+  ├── MusicalPulse                  — Beat subdivision enum (bar, quarter, eighth, sixteenth)
+  ├── MusicalPulseDescription       — Musical position from seconds (bar/beat/subdivision)
+  ├── MusicalMeasureDescription     — Tempo + time signature -> pulse durations
+  ├── VisualMusicalPulse            — Pixel widths for musical elements at a zoom level
+  ├── VisualMusicalTime             — Combined zoom/tempo/signature -> visual pulse
+  ├── TimelineDrawable              — Protocol for views mapping pixels <-> time
+  ├── TimelineRulerDrawingScale     — Zoom-dependent ruler spacing multipliers
+  └── TimelineRulerViewOptions      — Timeline ruler display configuration
 
 TimeFormatter/
-  ├── TimeFormatter.swift             — Multi-domain time display formatting
-  └── TimecodeDomain.swift            — Timecode state, frame rate conversion
+  ├── TimeFormatter                 — Multi-domain time display formatting
+  └── TimecodeDomain                — Timecode state, factory methods, frame rate conversion
 
 Timecode Extensions/
-  ├── SignedTimecode.swift             — Positive/negative timecode wrapper
-  ├── Timecode Parse.swift            — Flexible timecode string parsing
-  ├── Timecode Properties.swift       — Rounding, CMTime conversion, zero
-  └── FrameRate Extensions.swift      — Float value, frame duration, legacy strings
+  ├── SignedTimecode                — Positive/negative timecode wrapper
+  ├── Timecode Parse                — Flexible timecode string parsing
+  ├── Timecode Properties           — Rounding, CMTime conversion, zero convenience
+  └── FrameRate Extensions          — Float value, frame duration, legacy string init
 
 Utilities/
-  ├── CMTimeString.swift              — FCPXML time string parsing and creation
-  ├── CMTime+Utilities.swift          — CMTime extensions (stringValue, .one)
+  ├── CMTimeString                  — FCPXML time string parsing and creation
+  ├── CMTime+Utilities              — CMTime extensions (stringValue, .one, video timescale)
   └── Timers/
-      ├── TimerModel.swift            — Timer protocol (state, resume, suspend)
-      ├── TimerState.swift            — Timer state enum (suspended, resumed)
-      ├── TimerFactory.swift          — Factory for creating timer instances
-      ├── BasicTimer.swift            — Main-thread NSTimer wrapper
-      ├── OneShotTimer.swift          — Single-fire DispatchWorkItem timer
-      ├── RepeatingTimer.swift        — DispatchSourceTimer wrapper
-      ├── TransportTimer.swift        — Display-linked playback timer
-      ├── TransportTimerEvent.swift   — Transport state and time events
-      ├── DisplayLinkTimer.swift      — CADisplayLink wrapper (macOS 14+)
-      ├── LegacyDisplayLinkTimer.swift — CVDisplayLink fallback
-      └── DisplayLink.swift           — Core CVDisplayLink wrapper
+      ├── TimerModel                — Timer protocol (resume, suspend, dispose)
+      ├── TimerState                — Timer state enum (suspended, resumed)
+      ├── TimerFactory              — Factory for creating timer instances
+      ├── BasicTimer                — Main-thread NSTimer wrapper
+      ├── OneShotTimer              — Single-fire DispatchWorkItem timer
+      ├── RepeatingTimer            — DispatchSourceTimer wrapper (crash-safe resume)
+      ├── TransportTimer            — Display-linked playback timer (AVAudioTime sync)
+      ├── TransportTimerEvent       — Transport state and elapsed-time events
+      ├── DisplayLinkTimer          — CADisplayLink wrapper (macOS 14+)
+      ├── LegacyDisplayLinkTimer    — CVDisplayLink fallback (pre-macOS 14)
+      └── DisplayLink               — Core CVDisplayLink wrapper (deprecated)
 ```
 
 ## Dependencies

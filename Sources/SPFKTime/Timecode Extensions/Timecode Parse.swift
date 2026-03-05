@@ -3,7 +3,21 @@ import SPFKUtils
 import SwiftTimecode
 
 extension Timecode {
-    /// treats : ; . as delimiters
+    /// Parses a loosely-formatted timecode string into components.
+    ///
+    /// Supports multiple delimiter styles (`:`, `;`, `.`) and undelimited shorthand
+    /// where digits are consumed right-to-left (frames first). Up to five delimited
+    /// components are accepted: `HH:MM:SS:FF:SF`.
+    ///
+    /// Examples:
+    /// - `"01:00:10:15"` → h1 m0 s10 f15
+    /// - `"1;1"` → s1 f1
+    /// - `"11015"` (at 24fps) → m1 s10 f15
+    ///
+    /// - Parameters:
+    ///   - string: The raw input string.
+    ///   - frameRate: Used to determine the number of digits in the frames component.
+    /// - Returns: Parsed components, or `nil` if the input cannot be interpreted.
     public static func parseUnformattedTimecode(
         string: String,
         frameRate: TimecodeFrameRate

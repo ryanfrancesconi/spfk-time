@@ -2,7 +2,7 @@ import CoreMedia
 import SwiftTimecode
 
 extension Timecode {
-    /// Round down to the frame is subFrames is > 0
+    /// Rounds up to the next whole frame if subframes are present, otherwise returns self.
     public var roundedValue: Timecode {
         guard subFrames > 0 else { return self }
 
@@ -20,19 +20,21 @@ extension Timecode {
         return roundedValue
     }
 
-    /// This `Timecode` expressed as a `CMTime` object
+    /// This `Timecode` expressed as a `CMTime` object.
     public var cmTime: CMTime {
         CMTime(seconds: realTimeValue,
                preferredTimescale: frameRate.frameDurationCMTime.timescale)
     }
 
-    /// Convenience to return a 0:00 timecode at the frame rate
+    /// A zero timecode (`00:00:00:00`) at this instance's frame rate.
     public var zero: Timecode {
         .init(.zero, at: frameRate)
     }
 }
 
 extension Timecode {
+    /// Rounds up to the next whole frame by adding one frame and clearing subframes.
+    /// Returns self unchanged if there are no subframes.
     public func roundUpToNextFrame() throws -> Timecode {
         guard subFrames > 0 else { return self }
         var value = try adding(.components(f: 1))

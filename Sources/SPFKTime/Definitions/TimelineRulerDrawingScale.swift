@@ -1,15 +1,17 @@
 import Foundation
 
-/// Depending on the current pixelsPerSecond, multipliers to space out values in the ruler
+/// Zoom-dependent spacing multipliers for timeline ruler tick marks.
 ///
-/// This should ultimately be based on a formula, but manual divisions works and may be slightly more performant
+/// At low zoom levels the multipliers are large so tick marks stay readable;
+/// at high zoom levels they approach 1 (every unit is drawn).
 public struct TimelineRulerDrawingScale {
-    /// applicable for both real time and timecode
+    /// Spacing multiplier for real-time and timecode rulers.
     public var time: CGFloat = 1
 
-    /// bars and beats
+    /// Spacing multiplier for musical (bars and beats) rulers.
     public var musical: CGFloat = 1
 
+    /// Recalculates both multipliers for the given zoom level.
     public mutating func update(pixelsPerSecond: Double) {
         switch pixelsPerSecond {
         case ...0.025:

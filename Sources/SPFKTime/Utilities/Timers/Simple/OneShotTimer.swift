@@ -1,5 +1,7 @@
 import Foundation
 
+/// A single-fire timer backed by `DispatchWorkItem`. Fires once after ``timeInterval`` seconds
+/// and can be cancelled or restarted.
 public class OneShotTimer: TimerModel {
     public var timerType: TimerFactory.TimerType {
         .oneShot(timeInterval: timeInterval, qos: queue.qos)

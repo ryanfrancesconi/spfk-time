@@ -2,6 +2,11 @@ import Foundation
 import SwiftTimecode
 
 extension TimecodeFrameRate {
+    /// Creates a frame rate from a nominal FPS value (e.g. 24.0, 29.97).
+    ///
+    /// - Parameters:
+    ///   - fps: The nominal frames-per-second value.
+    ///   - interlaced: Whether the source is interlaced.
     public init?(fps: Float, interlaced: Bool = false) {
         guard let videoFrameRate = VideoFrameRate(
             fps: fps,
@@ -16,6 +21,8 @@ extension TimecodeFrameRate {
         self = value
     }
 
+    /// Creates a frame rate from a string, trying current raw values, string values,
+    /// and legacy underscore-prefixed formats in order.
     public init?(backwardsCompatibleStringValue value: String) {
         if let frameRate = TimecodeFrameRate(rawValue: value) {
             self = frameRate
@@ -29,6 +36,7 @@ extension TimecodeFrameRate {
         }
     }
 
+    /// Creates a frame rate from the legacy underscore-prefixed format (e.g. `"_23_976"`).
     public init?(legacyStringValue: String) {
         switch legacyStringValue {
         case "_23_976":
@@ -83,11 +91,12 @@ extension TimecodeFrameRate {
 }
 
 extension TimecodeFrameRate {
-    // nominal video rate
+    /// The nominal video frame rate as a `Float` (e.g. 23.976, 29.97, 24.0).
     public var floatValue: Float {
         Float(rate.numerator) / Float(rate.denominator)
     }
 
+    /// The real-time duration of a single frame in seconds.
     public var frameDurationInSeconds: TimeInterval {
         frameDurationCMTime.seconds
     }

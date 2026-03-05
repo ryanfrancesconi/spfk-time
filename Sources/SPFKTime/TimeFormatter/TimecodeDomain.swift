@@ -2,11 +2,14 @@
 import Foundation
 import SwiftTimecode
 
-/// How many subframes per frame.
-/// There is no industry standard; Pro Tools uses 100, Logic Pro and Cubase use 80.
-/// Most DAWs only support the SMPTE standard of a 24 hour clock:
-/// (00:00:00:00 ... 23:59:59:XX where XX is 1 frame less than 24 hours)
-/// However some DAWs like Cubase support Days as a timecode component.
+/// Manages SMPTE timecode state including frame rate, start offset, and current position.
+///
+/// Provides factory methods for creating `Timecode` values with consistent base settings,
+/// and handles frame rate conversion with strategies matching Pro Tools (preserve values)
+/// and Cubase (convert values) behavior.
+///
+/// Subframe resolution varies by DAW — Pro Tools uses 100, Logic Pro and Cubase use 80.
+/// Most DAWs limit to the SMPTE 24-hour clock (`00:00:00:00` … `23:59:59:XX`).
 public struct TimecodeDomain {
     // MARK: - Internal Properties
 
@@ -17,14 +20,20 @@ public struct TimecodeDomain {
         showSubFrames ? [.showSubFrames] : []
     }
 
+    /// The base timecode properties (frame rate, subframe base, upper limit).
     public private(set) var properties = Timecode.Properties(rate: Self.defaultFrameRate)
 
+    /// The current frame rate.
     public var frameRate: TimecodeFrameRate { properties.frameRate }
 
-    /// The real time duration one second of current timecode
+    /// The real-time duration of one second of timecode at the current frame rate.
+    /// For fractional rates this differs slightly from 1.0.
     public private(set) var timecodeSecond: TimeInterval = 1
 
+    /// Multiplier applied for fractional/drop frame rates (1.0 for integer rates).
     public private(set) var frameRateMultiplier: Double = 1
+
+    /// Combined multiplier for advancing time, accounting for fractional frame rates.
     public private(set) var timeAdvanceMultiplier: Double = 1
 
     var isFractional: Bool {
@@ -40,8 +49,10 @@ public struct TimecodeDomain {
         frameRate.isDrop
     }
 
+    /// The current timecode position.
     public private(set) var masterTimecode: Timecode
 
+    /// The start-of-timeline offset, or `nil` for a zero-based timeline.
     public private(set) var startTimecode: Timecode?
 
     // MARK: - Init
@@ -60,6 +71,7 @@ public struct TimecodeDomain {
         updateProperties()
     }
 
+    /// Recalculates derived values (`timecodeSecond`, multipliers) from the current frame rate.
     public mutating func updateProperties() {
         let hour = Timecode.Components(h: 1)
 

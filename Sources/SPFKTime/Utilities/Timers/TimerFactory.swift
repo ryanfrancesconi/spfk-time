@@ -5,6 +5,7 @@ import SwiftTimecode
 
 // https://developer.apple.com/library/archive/qa/qa1385/_index.html
 
+/// Factory for creating ``TimerModel`` instances of various types.
 public enum TimerFactory {
     /// 60 frames per second
     public static var fps60: TimeInterval {
@@ -16,20 +17,23 @@ public enum TimerFactory {
         TimecodeFrameRate.fps30.frameDurationCMTime.seconds
     }
 
+    /// Describes the kind of timer to create.
     public enum TimerType: Equatable {
-        /// Leeway in milliseconds
+        /// A main-thread `NSTimer` wrapper. Leeway is in milliseconds.
         case basic(timeInterval: TimeInterval = fps30,
                    leeway: Int = 100)
 
+        /// A single-fire `DispatchWorkItem` timer.
         case oneShot(timeInterval: TimeInterval = fps30,
                      qos: DispatchQoS = .default)
 
-        /// Leeway in milliseconds
+        /// A `DispatchSourceTimer` that fires repeatedly. Leeway is in milliseconds.
         case repeating(timeInterval: TimeInterval = fps30,
                        qos: DispatchQoS = .default,
                        leeway: Int = 100)
     }
 
+    /// Creates and returns a new timer of the specified type.
     public static func createTimer(_ type: TimerType) -> TimerModel {
         switch type {
         case let .basic(timeInterval, leeway):

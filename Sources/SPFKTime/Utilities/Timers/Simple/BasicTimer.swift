@@ -1,6 +1,6 @@
 import Foundation
 
-/// Will run on the Main thread
+/// A repeating timer backed by `NSTimer`, scheduled on the main run loop in `.common` mode.
 public class BasicTimer: TimerModel {
     public var timerType: TimerFactory.TimerType {
         .basic(timeInterval: timeInterval, leeway: leeway)

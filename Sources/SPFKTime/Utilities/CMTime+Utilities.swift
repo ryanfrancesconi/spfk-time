@@ -13,11 +13,13 @@ extension CMTime {
         return "\(value)/\(timescale)s"
     }
     
+    /// A `CMTime` representing exactly one second.
     public static var one: CMTime {
         CMTime(value: 1, timescale: 1)
     }
 }
 
 extension CMTimeScale {
+    /// The standard video timescale used by QuickTime and FCPXML (600 ticks per second).
     public static let cmTimeScaleVideo: Self = 600
 }

@@ -3,8 +3,13 @@ import Numerics
 import SPFKAudioBase
 import SPFKUtils
 
-/// Information for drawing a musical measure on screen
+/// Combines zoom level, tempo, and time signature to produce a ``VisualMusicalPulse``
+/// for drawing musical grids on screen.
+///
+/// When any input changes, the ``visualPulse`` is recomputed. Both ``tempo`` and
+/// ``timeSignature`` must be non-nil for a valid pulse to be produced.
 public struct VisualMusicalTime: Equatable, Codable, Sendable {
+    /// Default tempo used when none is specified (120 BPM).
     public static let defaultTempo: Double = 120
 
     public static func == (lhs: VisualMusicalTime, rhs: VisualMusicalTime) -> Bool {
@@ -15,6 +20,7 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
 
     private var _pixelsPerSecond: Double = 30 // arbitrary default
 
+    /// The zoom level in pixels per second. Must be positive, finite, and non-NaN.
     public var pixelsPerSecond: Double {
         get { _pixelsPerSecond }
         set {
@@ -29,7 +35,7 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
 
     private var _tempo: Bpm?
 
-    /// This will be clamped to a valid range
+    /// The tempo in BPM, clamped to a valid range. Set to `nil` to disable musical grid.
     public var tempo: Bpm? {
         get { _tempo }
         set {
@@ -38,12 +44,14 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
         }
     }
 
+    /// The time signature. Set to `nil` to disable musical grid.
     public var timeSignature: TimeSignature? {
         didSet {
             update()
         }
     }
 
+    /// The computed pulse layout, or `nil` if tempo or time signature is missing.
     public private(set) var visualPulse: VisualMusicalPulse?
 
     public init(

@@ -1,28 +1,47 @@
 import Foundation
 import SPFKUtils
 
+/// A musical position expressed as bar, beat, and subdivision values.
+///
+/// Converts a time-in-seconds into a musical position using the associated
+/// ``MusicalMeasureDescription``. All values are 1-based for display
+/// (bar 1, beat 1, subdivision 1 = time 0).
 public struct MusicalPulseDescription: Hashable, Codable, Sendable {
+    /// The measure definition (tempo + time signature) used for conversion.
     public var measure = MusicalMeasureDescription(timeSignature: ._4_4, tempo: ._120bpm)
 
-    /// used in transport display
+    /// Formatted string for transport display, e.g. `"1 1 1"`.
     public var stringValue: String {
         "\(bar) \(beat) \(subdivision)"
     }
 
+    /// Current bar number (1-based).
     public private(set) var bar: Int = 1
-    public private(set) var beat: Int = 1 // quarter note
-    public private(set) var subdivision: Int = 1 // sixteenth note
 
+    /// Current beat within the bar (1-based, quarter-note grid).
+    public private(set) var beat: Int = 1
+
+    /// Current subdivision within the beat (1-based, sixteenth-note grid).
+    public private(set) var subdivision: Int = 1
+
+    /// Fractional bar position (0-based, continuous).
     public private(set) var fractionalBar: Double = 0
+
+    /// Fractional beat within the current bar (0-based, continuous).
     public private(set) var fractionalBeat: Double = 0
+
+    /// Fractional subdivision within the current beat (0-based, continuous).
     public private(set) var fractionalSubdivision: Double = 0
 
+    /// The time value in seconds that produced this position.
     public private(set) var seconds: TimeInterval = 0
 
+    /// Creates a pulse description at the given time.
     public init(time: TimeInterval = 0) {
         update(time: time)
     }
 
+    /// Recalculates bar, beat, and subdivision from a new time value.
     public mutating func update(time: TimeInterval) {
         self.seconds = time
 

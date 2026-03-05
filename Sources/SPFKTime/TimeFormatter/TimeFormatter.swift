@@ -7,13 +7,18 @@ import SwiftTimecode
 ///
 /// A mechanism for storing and converting time, and generating time display strings.
 public struct TimeFormatter {
+    /// The time domain used when generating ``primaryString``.
     public var primaryDomain: TimeDomain
 
+    /// The timecode state (position, start offset, frame rate).
     public var timecode: TimecodeDomain = .init()
+
+    /// The real-time state (elapsed seconds).
     public var realTime: RealTimeDomain = .init()
 
     // MARK: - Init
 
+    /// Creates a formatter with the specified primary display domain.
     public init(primaryDomain: TimeDomain) {
         self.primaryDomain = primaryDomain
     }

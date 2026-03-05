@@ -3,16 +3,23 @@ import Foundation
 import QuartzCore
 import SPFKUtils
 
+/// A display-link timer backed by `CADisplayLink` (macOS 14+).
+///
+/// Fires in sync with the screen's refresh rate for smooth UI updates.
+/// Create from an `NSView`, `NSWindow`, or `NSScreen` to bind to
+/// the appropriate display.
 @available(macOS 14, *)
 public class DisplayLinkTimer: TimerModel {
     public var eventHandler: (() -> Void)?
 
+    /// The display's frame duration in seconds.
     public var timeInterval: TimeInterval {
         displayLink?.duration ?? 0
     }
 
     public private(set) var state: TimerState = .suspended
 
+    /// The display's current refresh rate in frames per second.
     public var fps: Double {
         guard let displayLink else { return 0 }
         let delta = displayLink.targetTimestamp - displayLink.timestamp
@@ -20,6 +27,7 @@ public class DisplayLinkTimer: TimerModel {
         return 1 / delta
     }
 
+    /// The timestamp of the last display refresh.
     public var timestamp: CFTimeInterval {
         displayLink?.timestamp ?? 0
     }
