@@ -1,3 +1,5 @@
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
+
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
 
 import Foundation
@@ -52,3 +54,5 @@ public class LegacyDisplayLinkTimer: TimerModel {
         displayLink = nil
     }
 }
+
+#endif

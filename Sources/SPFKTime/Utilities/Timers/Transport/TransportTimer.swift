@@ -1,182 +1,186 @@
-// Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
 
-import AppKit
-import AVFoundation
-import SwiftExtensions
-import SPFKUtils
-import SwiftTimecode
+    // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
 
-/// Transport​Timer is a facade that wraps a platform-appropriate display link timer and bridges it
-/// to the audio synchronization domain via AVAudio​Time / mach​_absolute​_time.
-public class TransportTimer {
-    /// Closure receiving ``TransportTimerEvent`` values (state changes and time updates).
-    public var eventHandler: ((TransportTimerEvent) -> Void)?
+    import AppKit
+    import AVFoundation
+    import SPFKUtils
+    import SwiftExtensions
+    import SwiftTimecode
 
-    /// `true` when the transport is paused (position preserved for resume).
-    public private(set) var isPaused: Bool = false
+    /// Transport​Timer is a facade that wraps a platform-appropriate display link timer and bridges it
+    /// to the audio synchronization domain via AVAudio​Time / mach​_absolute​_time.
+    public class TransportTimer {
+        /// Closure receiving ``TransportTimerEvent`` values (state changes and time updates).
+        public var eventHandler: ((TransportTimerEvent) -> Void)?
 
-    /// The current position of the playhead in fractional seconds.
-    /// This is real time seconds. Can only be set when the timer isn't running.
-    public var currentTime: TimeInterval = 0
+        /// `true` when the transport is paused (position preserved for resume).
+        public private(set) var isPaused: Bool = false
 
-    private var avStartTime = AVAudioTime.now()
+        /// The current position of the playhead in fractional seconds.
+        /// This is real time seconds. Can only be set when the timer isn't running.
+        public var currentTime: TimeInterval = 0
 
-    private let internalTimer: TimerModel
+        private var avStartTime = AVAudioTime.now()
 
-    // MARK: - Init
+        private let internalTimer: TimerModel
 
-    /// Creates a transport timer bound to the display containing the given view.
-    @MainActor public init(on view: NSView) {
-        defer {
+        // MARK: - Init
+
+        /// Creates a transport timer bound to the display containing the given view.
+        @MainActor public init(on view: NSView) {
+            defer {
+                internalTimer.eventHandler = handleTimerUpdateEvent
+            }
+
+            if #available(macOS 14, *) {
+                internalTimer = DisplayLinkTimer(on: view)
+                return
+            }
+
+            internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
+        }
+
+        /// Creates a transport timer bound to the display containing the given window.
+        @MainActor public init(on window: NSWindow) {
+            defer {
+                internalTimer.eventHandler = handleTimerUpdateEvent
+            }
+
+            if #available(macOS 14, *) {
+                internalTimer = DisplayLinkTimer(window: window)
+                return
+            }
+
+            internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
+        }
+
+        /// Creates a transport timer bound to the given screen.
+        @MainActor public init(screen: NSScreen? = NSScreen.screens.first) throws {
+            guard let screen else {
+                throw NSError(description: "Failed to get NSScreen for display link")
+            }
+
+            defer {
+                internalTimer.eventHandler = handleTimerUpdateEvent
+            }
+
+            if #available(macOS 14, *) {
+                internalTimer = DisplayLinkTimer(screen: screen)
+                return
+            }
+
+            internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
+        }
+
+        @available(macOS, deprecated: 14.0, message: "Use view based timer")
+        public init(dispatchQueue: DispatchQueue) {
+            internalTimer = LegacyDisplayLinkTimer(onQueue: dispatchQueue)
             internalTimer.eventHandler = handleTimerUpdateEvent
         }
 
-        if #available(macOS 14, *) {
-            internalTimer = DisplayLinkTimer(on: view)
-            return
-        }
-
-        internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
-    }
-
-    /// Creates a transport timer bound to the display containing the given window.
-    @MainActor public init(on window: NSWindow) {
-        defer {
+        /// Internal initializer for testing with an injected timer
+        init(timer: TimerModel) {
+            internalTimer = timer
             internalTimer.eventHandler = handleTimerUpdateEvent
         }
 
-        if #available(macOS 14, *) {
-            internalTimer = DisplayLinkTimer(window: window)
-            return
+        deinit {
+            Log.debug("- { \(self) }")
         }
 
-        internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
-    }
-
-    /// Creates a transport timer bound to the given screen.
-    @MainActor public init(screen: NSScreen? = NSScreen.screens.first) throws {
-        guard let screen else {
-            throw NSError(description: "Failed to get NSScreen for display link")
+        /// Permanently stops the timer and releases the event handler.
+        public func dispose() {
+            internalTimer.dispose()
+            eventHandler = nil
         }
 
-        defer {
-            internalTimer.eventHandler = handleTimerUpdateEvent
+        /// Received event from the timer, called on the screen refresh rate
+        private func handleTimerUpdateEvent() {
+            let avNow = AVAudioTime(hostTime: mach_absolute_time())
+
+            // Find the difference between current time and start time.
+            guard let elapsedTime = avNow.timeIntervalSince(otherTime: avStartTime) else {
+                return
+            }
+
+            currentTime = elapsedTime
+
+            send(event: .time(elapsedTime))
         }
 
-        if #available(macOS 14, *) {
-            internalTimer = DisplayLinkTimer(screen: screen)
-            return
+        /// Starts playback, treating `time` as the initial elapsed position.
+        ///
+        /// - Parameters:
+        ///   - time: The initial elapsed time in seconds.
+        ///   - hostTime: Optional `mach_absolute_time` anchor; defaults to now.
+        public func start(
+            at time: TimeInterval,
+            hostTime: UInt64? = nil
+        ) {
+            guard !isRunning else {
+                Log.error("Transport is already running")
+                return
+            }
+
+            let hostTime = hostTime ?? mach_absolute_time()
+
+            let avTime = AVAudioTime(hostTime: hostTime).offset(seconds: -time)
+            start(avTime: avTime)
         }
 
-        internalTimer = LegacyDisplayLinkTimer(onQueue: .main)
-    }
+        /// Starts playback anchored to the given `AVAudioTime`.
+        public func start(avTime: AVAudioTime) {
+            avStartTime = avTime
 
-    @available(macOS, deprecated: 14.0, message: "Use view based timer")
-    public init(dispatchQueue: DispatchQueue) {
-        internalTimer = LegacyDisplayLinkTimer(onQueue: dispatchQueue)
-        internalTimer.eventHandler = handleTimerUpdateEvent
-    }
-
-    /// Internal initializer for testing with an injected timer
-    init(timer: TimerModel) {
-        internalTimer = timer
-        internalTimer.eventHandler = handleTimerUpdateEvent
-    }
-
-    deinit {
-        Log.debug("- { \(self) }")
-    }
-
-    /// Permanently stops the timer and releases the event handler.
-    public func dispose() {
-        internalTimer.dispose()
-        eventHandler = nil
-    }
-
-    /// Received event from the timer, called on the screen refresh rate
-    private func handleTimerUpdateEvent() {
-        let avNow = AVAudioTime(hostTime: mach_absolute_time())
-
-        // Find the difference between current time and start time.
-        guard let elapsedTime = avNow.timeIntervalSince(otherTime: avStartTime) else {
-            return
+            internalTimer.resume()
+            send(event: .state(.start))
         }
 
-        self.currentTime = elapsedTime
+        /// Stops playback and resets the transport. No-op if not running.
+        public func stop() {
+            guard isRunning else { return }
 
-        send(event: .time(elapsedTime))
-    }
-
-    /// Starts playback, treating `time` as the initial elapsed position.
-    ///
-    /// - Parameters:
-    ///   - time: The initial elapsed time in seconds.
-    ///   - hostTime: Optional `mach_absolute_time` anchor; defaults to now.
-    public func start(
-        at time: TimeInterval,
-        hostTime: UInt64? = nil
-    ) {
-        guard !isRunning else {
-            Log.error("Transport is already running")
-            return
+            internalTimer.suspend()
+            send(event: .state(.stop))
         }
 
-        let hostTime = hostTime ?? mach_absolute_time()
+        /// Pauses playback, preserving the current position for later resume.
+        public func pause() {
+            guard isRunning else { return }
 
-        let avTime = AVAudioTime(hostTime: hostTime).offset(seconds: -time)
-        start(avTime: avTime)
+            internalTimer.suspend()
+            isPaused = true
+            send(event: .state(.pause))
+        }
+
+        /// Resumes playback from the paused position. No-op if not paused.
+        public func resume() {
+            guard isPaused else { return }
+            isPaused = false
+
+            let avTime = AVAudioTime(hostTime: mach_absolute_time()).offset(seconds: -currentTime)
+            avStartTime = avTime
+
+            internalTimer.resume()
+            send(event: .state(.resume))
+        }
     }
 
-    /// Starts playback anchored to the given `AVAudioTime`.
-    public func start(avTime: AVAudioTime) {
-        self.avStartTime = avTime
+    extension TransportTimer {
+        /// `true` when the display-link timer is actively firing.
+        public var isRunning: Bool {
+            internalTimer.state == .resumed
+        }
 
-        internalTimer.resume()
-        send(event: .state(.start))
+        /// The effective refresh rate of the underlying display-link timer.
+        public var fps: Double {
+            internalTimer.fps
+        }
+
+        fileprivate func send(event: TransportTimerEvent) {
+            eventHandler?(event)
+        }
     }
 
-    /// Stops playback and resets the transport. No-op if not running.
-    public func stop() {
-        guard isRunning else { return }
-
-        internalTimer.suspend()
-        send(event: .state(.stop))
-    }
-
-    /// Pauses playback, preserving the current position for later resume.
-    public func pause() {
-        guard isRunning else { return }
-
-        internalTimer.suspend()
-        isPaused = true
-        send(event: .state(.pause))
-    }
-
-    /// Resumes playback from the paused position. No-op if not paused.
-    public func resume() {
-        guard isPaused else { return }
-        isPaused = false
-
-        let avTime = AVAudioTime(hostTime: mach_absolute_time()).offset(seconds: -currentTime)
-        self.avStartTime = avTime
-
-        internalTimer.resume()
-        send(event: .state(.resume))
-    }
-}
-
-extension TransportTimer {
-    /// `true` when the display-link timer is actively firing.
-    public var isRunning: Bool {
-        internalTimer.state == .resumed
-    }
-
-    /// The effective refresh rate of the underlying display-link timer.
-    public var fps: Double {
-        internalTimer.fps
-    }
-
-    fileprivate func send(event: TransportTimerEvent) {
-        self.eventHandler?(event)
-    }
-}
+#endif
