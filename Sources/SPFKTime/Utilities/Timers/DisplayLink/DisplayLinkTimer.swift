@@ -15,7 +15,9 @@ public class DisplayLinkTimer: TimerModel {
 
     public var fps: Double {
         guard let displayLink else { return 0 }
-        return 1 / (displayLink.targetTimestamp - displayLink.timestamp)
+        let delta = displayLink.targetTimestamp - displayLink.timestamp
+        guard delta > 0 else { return 0 }
+        return 1 / delta
     }
 
     public var timestamp: CFTimeInterval {
