@@ -231,5 +231,9 @@ Utilities/
 
 ## Requirements
 
-- macOS 12+ / iOS 15+
-- Swift 6.2+
+- **Swift** 6.2+
+- **macOS** 13+, **iOS** 16+
+
+## About
+
+Spongefork (SPFK) is the personal software projects of [Ryan Francesconi](https://github.com/ryanfrancesconi). Dedicated to creative sound manipulation, his first application, Spongefork, was released in 1999 for macOS 8. From 2016 to 2025 he was the lead macOS developer at [Audio Design Desk](https://add.app).
