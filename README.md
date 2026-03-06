@@ -109,7 +109,7 @@ Types for tempo-aware musical time representation, position tracking, and visual
 // Define a measure from tempo + time signature
 let measure = MusicalMeasureDescription(
     timeSignature: ._4_4,
-    tempo: Bpm(120)
+    bpm: Bpm(120)
 )
 measure.duration(pulse: .bar)       // 2.0 seconds
 measure.duration(pulse: .quarter)   // 0.5 seconds

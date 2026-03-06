@@ -32,7 +32,7 @@ public struct VisualMusicalPulse: Equatable, Codable, Sendable {
     ///   - measure: The measure definition providing pulse durations.
     /// - Throws: If the tempo is zero.
     public init(pixelsPerSecond: Double, measure: MusicalMeasureDescription) throws {
-        guard measure.tempo.rawValue > 0 else {
+        guard measure.bpm.rawValue > 0 else {
             throw NSError(description: "tempo must be greater than zero")
         }
 

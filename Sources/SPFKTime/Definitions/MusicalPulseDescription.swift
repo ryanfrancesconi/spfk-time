@@ -10,7 +10,7 @@ import SPFKUtils
 /// (bar 1, beat 1, subdivision 1 = time 0).
 public struct MusicalPulseDescription: Hashable, Codable, Sendable {
     /// The measure definition (tempo + time signature) used for conversion.
-    public var measure = MusicalMeasureDescription(timeSignature: ._4_4, tempo: ._120bpm)
+    public var measure = MusicalMeasureDescription(timeSignature: ._4_4, bpm: .bpm120)
 
     /// Formatted string for transport display, e.g. `"1 1 1"`.
     public var stringValue: String {
@@ -45,7 +45,7 @@ public struct MusicalPulseDescription: Hashable, Codable, Sendable {
 
     /// Recalculates bar, beat, and subdivision from a new time value.
     public mutating func update(time: TimeInterval) {
-        self.seconds = time
+        seconds = time
 
         guard time >= 0 else {
             fractionalBar = 0

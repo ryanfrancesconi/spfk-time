@@ -17,7 +17,7 @@ public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable 
     }
 
     /// The tempo in beats per minute. Changing this recalculates all cached durations.
-    public var tempo: Bpm {
+    public var bpm: Bpm {
         didSet {
             update()
         }
@@ -30,10 +30,10 @@ public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable 
     ///
     /// - Parameters:
     ///   - timeSignature: The time signature (defaults to 4/4).
-    ///   - tempo: The tempo in BPM (defaults to 60, clamped to the valid range).
-    public init(timeSignature: TimeSignature = ._4_4, tempo: Bpm = ._60bpm) {
+    ///   - bpm: The tempo in BPM (defaults to 60, clamped to the valid range).
+    public init(timeSignature: TimeSignature = ._4_4, bpm: Bpm = .bpm60) {
         self.timeSignature = timeSignature
-        self.tempo = tempo.clamped(to: Bpm.tempoRange)
+        self.bpm = bpm.clamped(to: Bpm.tempoRange)
         update()
     }
 
@@ -58,7 +58,7 @@ public struct MusicalMeasureDescription: Equatable, Codable, Hashable, Sendable 
 
         var value: TimeInterval
 
-        let quarterNoteDuration = tempo.quarterNoteDuration
+        let quarterNoteDuration = bpm.quarterNoteDuration
 
         switch pulse {
         case .bar:
@@ -136,7 +136,7 @@ extension MusicalMeasureDescription {
 extension MusicalMeasureDescription: CustomStringConvertible {
     public var description: String {
         """
-        MusicalMeasureDescription(timeSignature: \(timeSignature), tempo: \(tempo.stringValue))
+        MusicalMeasureDescription(timeSignature: \(timeSignature), bpm: \(bpm.stringValue))
         """
     }
 }

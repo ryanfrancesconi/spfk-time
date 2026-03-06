@@ -9,7 +9,7 @@ struct VisualMusicalTimeTests {
     @Test func width_4_4_60() {
         var visualTime = VisualMusicalTime()
         visualTime.timeSignature = ._4_4
-        visualTime.tempo = ._60bpm
+        visualTime.bpm = .bpm60
         visualTime.pixelsPerSecond = 60
 
         #expect(visualTime.visualPulse?.width(of: .bar) == 240)
@@ -21,7 +21,7 @@ struct VisualMusicalTimeTests {
     @Test func width_8_8_60() {
         var visualTime = VisualMusicalTime()
         visualTime.timeSignature = ._8_8
-        visualTime.tempo = ._60bpm
+        visualTime.bpm = .bpm60
         visualTime.pixelsPerSecond = 60
 
         #expect(visualTime.visualPulse?.width(of: .bar) == 240)
@@ -32,7 +32,7 @@ struct VisualMusicalTimeTests {
     @Test func width_4_4_120() {
         var visualTime = VisualMusicalTime()
         visualTime.timeSignature = ._4_4
-        visualTime.tempo = ._120bpm
+        visualTime.bpm = .bpm120
         visualTime.pixelsPerSecond = 30
 
         #expect(visualTime.visualPulse?.width(of: .bar) == 60)

@@ -16,7 +16,7 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
 
     public static func == (lhs: VisualMusicalTime, rhs: VisualMusicalTime) -> Bool {
         lhs.pixelsPerSecond == rhs.pixelsPerSecond &&
-            lhs.tempo == rhs.tempo &&
+            lhs.bpm == rhs.bpm &&
             lhs.timeSignature == rhs.timeSignature
     }
 
@@ -35,13 +35,13 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
         }
     }
 
-    private var _tempo: Bpm?
+    private var _bpm: Bpm?
 
     /// The tempo in BPM, clamped to a valid range. Set to `nil` to disable musical grid.
-    public var tempo: Bpm? {
-        get { _tempo }
+    public var bpm: Bpm? {
+        get { _bpm }
         set {
-            _tempo = newValue?.clamped(to: Bpm.tempoRange)
+            _bpm = newValue?.clamped(to: Bpm.tempoRange)
             update()
         }
     }
@@ -58,18 +58,18 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
 
     public init(
         pixelsPerSecond: Double = 30,
-        tempo: Bpm? = nil,
+        bpm: Bpm? = nil,
         timeSignature: TimeSignature? = nil
     ) {
         self.pixelsPerSecond = pixelsPerSecond
         self.timeSignature = timeSignature
-        self.tempo = tempo
+        self.bpm = bpm
 
         update()
     }
 
     private mutating func update() {
-        guard let tempo else {
+        guard let bpm else {
             visualPulse = nil
             return
         }
@@ -86,7 +86,7 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
                 pixelsPerSecond: pixelsPerSecond,
                 measure: MusicalMeasureDescription(
                     timeSignature: timeSignature,
-                    tempo: tempo
+                    bpm: bpm
                 )
             )
 
@@ -99,7 +99,7 @@ public struct VisualMusicalTime: Equatable, Codable, Sendable {
 extension VisualMusicalTime: CustomDebugStringConvertible {
     public var debugDescription: String {
         """
-        VisualMusicalTime(pixelsPerSecond: \(pixelsPerSecond), tempo: \(tempo?.stringValue ?? "nil"), timeSignature: \(timeSignature?.debugDescription ?? "nil"))
+        VisualMusicalTime(pixelsPerSecond: \(pixelsPerSecond), bpm: \(bpm?.stringValue ?? "nil"), timeSignature: \(timeSignature?.debugDescription ?? "nil"))
         """
     }
 }
