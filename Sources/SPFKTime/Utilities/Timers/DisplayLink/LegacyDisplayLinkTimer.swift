@@ -3,6 +3,7 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
 
 import Foundation
+import SPFKBase
 import SPFKUtils
 
 /// Legacy Timer based on screen refresh rate

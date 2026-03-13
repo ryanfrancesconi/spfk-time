@@ -4,6 +4,7 @@
 
     import AppKit
     import AVFoundation
+    import SPFKBase
     import SPFKUtils
     import SwiftExtensions
     import SwiftTimecode

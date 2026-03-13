@@ -4,6 +4,7 @@
     import AppKit
     import Foundation
     import QuartzCore
+    import SPFKBase
     import SPFKUtils
 
     /// A display-link timer backed by `CADisplayLink` (macOS 14+).
