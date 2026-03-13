@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/ryanfrancesconi/spfk-base", from: "0.0.3"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-utils", from: "0.0.8"),
-        .package(url: "https://github.com/ryanfrancesconi/spfk-testing", from: "0.0.5"),
+        .package(url: "https://github.com/ryanfrancesconi/spfk-testing", from: "0.0.9"),
         .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
     ],
     targets: [
