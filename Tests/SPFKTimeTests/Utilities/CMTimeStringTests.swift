@@ -2,23 +2,24 @@
 
 import CoreMedia
 import Numerics
+import SPFKBase
 import SPFKTime
 import SPFKUtils
 import SwiftTimecode
 import Testing
 
 class CMTimeStringTests {
-    @Test func testCMTimeParser() {
+    @Test func cMTimeParser() {
         let cmTime = CMTimeString.parse(string: "3600s")
         let shouldBe = CMTimeMake(value: 3600, timescale: 1)
         #expect(cmTime == shouldBe)
 
         let cmTime2 = CMTimeString.parse(string: "576800/9600s")
-        let shouldBe2 = CMTimeMake(value: 576800, timescale: 9600)
+        let shouldBe2 = CMTimeMake(value: 576_800, timescale: 9600)
         #expect(cmTime2 == shouldBe2)
     }
 
-    @Test func testCreateCMTimeStringSeconds() throws {
+    @Test func createCMTimeStringSeconds() throws {
         // this will be rounded to frame
         let seconds: TimeInterval = 4.0940625
 
@@ -38,7 +39,7 @@ class CMTimeStringTests {
         }
     }
 
-    @Test func testCreateCMTimeStringFrames() throws {
+    @Test func createCMTimeStringFrames() throws {
         try checkTimeString(seconds: 4.0940625)
         try checkTimeString(seconds: 120.0)
         try checkTimeString(seconds: 3600.0)
@@ -51,8 +52,8 @@ class CMTimeStringTests {
 
             if let value = CMTimeString.create(
                 seconds: seconds,
-                frameRate: frameRate)
-            {
+                frameRate: frameRate
+            ) {
                 string = value
             }
 
@@ -74,8 +75,8 @@ class CMTimeStringTests {
             if let value = CMTimeString.create(
                 seconds: seconds,
                 sampleRate: sampleRate,
-                frameRate: frameRate)
-            {
+                frameRate: frameRate
+            ) {
                 string = value
             }
 
@@ -101,7 +102,7 @@ class CMTimeStringTests {
         Log.debug(seconds, timecode2.realTimeValue, timecode2.stringValue, timecode2.frameCount)
     }
 
-    @Test func testRealToFraction() throws {
+    @Test func realToFraction() throws {
         let realNumber: Double = 51.718333333333327
 
         for frameRate in TimecodeFrameRate.allCases {
@@ -115,7 +116,7 @@ class CMTimeStringTests {
 }
 
 extension CMTimeStringTests {
-    @Test func testSecond() {
+    @Test func second() {
         Log.debug(CMTime.one.seconds)
     }
 }

@@ -2,6 +2,7 @@
 
 import Foundation
 import SPFKAudioBase
+import SPFKBase
 import SPFKUtils
 import Testing
 

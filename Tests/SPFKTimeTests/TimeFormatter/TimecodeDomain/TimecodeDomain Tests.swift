@@ -1,9 +1,10 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
 
+import SPFKBase
 @testable import SPFKTime
 import SPFKUtils
-import Testing
 import SwiftTimecode
+import Testing
 
 class TimecodeDomainTests {
     lazy var td: TimecodeDomain = {
@@ -27,7 +28,7 @@ class TimecodeDomainTests {
 
     // MARK: - Helpers
 
-    @Test func testFormNewTimecode_CalculateElapsedRealTime() throws {
+    @Test func formNewTimecode_CalculateElapsedRealTime() throws {
         // just test elapsed time calculation value,
         // don't need to test the setters here; they are tested
         // in other unit tests already
@@ -46,7 +47,7 @@ class TimecodeDomainTests {
 
     // MARK: - Timecode Factory Methodss
 
-    @Test func testFormNewTimecode_ConvertingFrom1() throws {
+    @Test func formNewTimecode_ConvertingFrom1() throws {
         // same base settings, same frame rate
         let timecode = try Timecode(
             .components(Timecode.Components(h: 1)),
@@ -64,7 +65,7 @@ class TimecodeDomainTests {
     }
 
     // different base settings, different frame rate
-    @Test func testFormNewTimecode_ConvertingFrom2() throws {
+    @Test func formNewTimecode_ConvertingFrom2() throws {
         let timecode = try Timecode(
             .components(Timecode.Components(h: 1)),
             at: .fps24,
@@ -81,7 +82,7 @@ class TimecodeDomainTests {
     }
 
     // same base settings, different frame rate
-    @Test func testFormNewTimecode_ConvertingFrom3() throws {
+    @Test func formNewTimecode_ConvertingFrom3() throws {
         let timecode = try Timecode(
             .components(Timecode.Components(h: 1)),
             at: .fps23_976,
@@ -98,7 +99,7 @@ class TimecodeDomainTests {
     }
 
     // different base settings, different frame rate
-    @Test func testFormNewTimecode_ConvertingFrom4() throws {
+    @Test func formNewTimecode_ConvertingFrom4() throws {
         let timecode = try Timecode(
             .components(Timecode.Components(h: 1)),
             at: .fps23_976,
@@ -114,7 +115,7 @@ class TimecodeDomainTests {
         #expect(tc.upperLimit == .max24Hours)
     }
 
-    @Test func testFormNewTimecode_String() throws {
+    @Test func formNewTimecode_String() throws {
         let tc = try td.formNewTimecode(string: "01:02:03:04")
 
         #expect(tc.components == Timecode.Components(h: 1, m: 2, s: 3, f: 4))
@@ -127,7 +128,7 @@ class TimecodeDomainTests {
         #expect((try? td.formNewTimecode(string: "blahblah")) == nil)
     }
 
-    @Test func testFormNewTimecode_Components() throws {
+    @Test func formNewTimecode_Components() throws {
         let tc = td.formNewTimecode(components: Timecode.Components(h: 1, m: 2, s: 3, f: 4))
 
         #expect(tc.components == Timecode.Components(h: 1, m: 2, s: 3, f: 4))
@@ -136,7 +137,7 @@ class TimecodeDomainTests {
         #expect(tc.upperLimit == .max24Hours)
     }
 
-    @Test func testFormNewTimecode_Components_RawValues1() throws {
+    @Test func formNewTimecode_Components_RawValues1() throws {
         let tc = td.formNewTimecode(components: Timecode.Components(h: 1, m: 2, s: 3, f: 4))
 
         #expect(tc.components == Timecode.Components(h: 1, m: 2, s: 3, f: 4))
@@ -146,7 +147,7 @@ class TimecodeDomainTests {
     }
 
     // valid rawValues
-    @Test func testFormNewTimecode_Components_RawValues2() throws {
+    @Test func formNewTimecode_Components_RawValues2() throws {
         let tc = td.formNewTimecode(components: Timecode.Components(h: 99, m: 99, s: 99, f: 99), by: .allowingInvalid)
 
         #expect(tc.components == Timecode.Components(h: 99, m: 99, s: 99, f: 99))
@@ -155,7 +156,7 @@ class TimecodeDomainTests {
         #expect(tc.upperLimit == .max24Hours)
     }
 
-    @Test func testFormNewTimecode_Seconds() throws {
+    @Test func formNewTimecode_Seconds() throws {
         let tc = td.formNewTimecode(wrappingRealTimeSeconds: 3600.0)
 
         #expect(tc.components == Timecode.Components(h: 1, m: 0, s: 0, f: 0))
@@ -172,7 +173,7 @@ class TimecodeDomainTests {
         #expect(tcWrapped2.stringValue() == "01:00:00:00")
     }
 
-    @Test func testFormNewSignedTimecode1() throws {
+    @Test func formNewSignedTimecode1() throws {
         let signedTC = td.formNewSignedTimecode(seconds: 3600.0)
 
         #expect(signedTC.sign == .plus)
@@ -185,7 +186,7 @@ class TimecodeDomainTests {
         #expect(tc.upperLimit == .max24Hours)
     }
 
-    @Test func testFormNewSignedTimecode2() throws {
+    @Test func formNewSignedTimecode2() throws {
         let signedTC = td.formNewSignedTimecode(seconds: -3600.0)
 
         #expect(signedTC.sign == .minus)
