@@ -44,7 +44,7 @@ extension TimelineDrawable {
     }
 }
 
-#if canImport(AppKit) && !targetEnvironment(macCatalyst)
+#if os(macOS)
 
     import AppKit
 
