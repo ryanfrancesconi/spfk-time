@@ -3,7 +3,7 @@
 import Foundation
 
 /// Events emitted by ``TransportTimer`` to its event handler.
-public enum TransportTimerEvent {
+public enum TransportTimerEvent: Sendable {
     /// A transport state change (start, stop, pause, resume).
     case state(TransportTimerPlayState)
 
@@ -15,7 +15,7 @@ public enum TransportTimerEvent {
 }
 
 /// The playback state reported by a ``TransportTimer``.
-public enum TransportTimerPlayState {
+public enum TransportTimerPlayState: Sendable {
     /// Playback has started from a stopped state.
     case start
     /// Playback has stopped.
