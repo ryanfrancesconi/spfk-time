@@ -22,7 +22,7 @@
         /// This is real time seconds. Can only be set when the timer isn't running.
         public var currentTime: TimeInterval = 0
 
-        private var avStartTime = AVAudioTime.now()
+        public private(set) var avStartTime = AVAudioTime.now()
 
         private let internalTimer: TimerModel
 
