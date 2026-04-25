@@ -3,9 +3,9 @@
 import Foundation
 
 /// Configuration for a dual-ruler timeline header.
-public struct TimelineRulerViewOptions: Equatable {
+public struct TimelineRulerViewOptions: Equatable, Codable, Sendable {
     /// The type of time representation shown in a ruler lane.
-    public enum DisplayType: Equatable {
+    public enum DisplayType: Equatable, Codable, Sendable {
         /// Wall-clock seconds.
         case realTime
         /// SMPTE timecode.
