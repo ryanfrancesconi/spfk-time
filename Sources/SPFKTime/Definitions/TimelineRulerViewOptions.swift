@@ -14,6 +14,14 @@ public struct TimelineRulerViewOptions: Equatable, Codable, Sendable {
         case musical
         /// Ruler lane is hidden.
         case none
+
+        public var timeDomain: TimeDomain {
+            switch self {
+            case .realTime, .none: .realTime
+            case .timecode: .timecode
+            case .musical: .musical
+            }
+        }
     }
 
     /// The time domain shown in the top ruler lane.

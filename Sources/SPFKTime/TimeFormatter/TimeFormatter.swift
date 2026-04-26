@@ -129,13 +129,12 @@ extension TimeFormatter {
             RealTimeDomain.string(
                 seconds: seconds,
                 showHours: .auto,
-                showMilliseconds: false
+                showMilliseconds: true
             )
 
         case .timecode:
             timecode.formNewTimecode(wrappingRealTimeSeconds: seconds).stringValue()
 
-        // TODO:
         case .musical:
             ""
         }

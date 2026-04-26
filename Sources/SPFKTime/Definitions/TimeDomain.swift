@@ -5,9 +5,9 @@ import Foundation
 /// The three supported time domains for display and navigation.
 ///
 /// Each case carries a raw string suitable for use as a UI label.
-public enum TimeDomain: String, CaseIterable {
+public enum TimeDomain: String, CaseIterable, Codable, Sendable {
     /// Wall-clock seconds (e.g. `"0:03.500"`).
-    case realTime = "Time"
+    case realTime = "Real Time"
 
     /// SMPTE timecode (e.g. `"01:00:00:00"`).
     case timecode = "Timecode"
@@ -15,4 +15,3 @@ public enum TimeDomain: String, CaseIterable {
     /// Musical bars and beats (e.g. `"1 1 1"`).
     case musical = "Bars"
 }
-
