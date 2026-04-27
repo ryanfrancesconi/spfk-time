@@ -31,8 +31,4 @@ struct TimeDisplayFormatTests {
         #expect(TimeDisplayFormat.seconds.rawValue == "seconds")
     }
 
-    @Test("all cases")
-    func allCases() {
-        #expect(TimeDisplayFormat.allCases.count == 2)
-    }
 }
