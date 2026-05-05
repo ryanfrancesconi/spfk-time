@@ -125,6 +125,34 @@ extension MusicalMeasureDescriptionTests {
         )
     }
 
+    // MARK: - timeToNearest for other pulse levels
+
+    /// Bar, eighth, and sixteenth are used for snap and step controls; this verifies their
+    /// formula agrees with the quarter-note path at 4/4 60 BPM.
+    @Test func timeToNearest_bar() throws {
+        let measure = MusicalMeasureDescription(timeSignature: ._4_4, bpm: .bpm60)
+        // bar = 4s at 60 BPM 4/4; standing at t=2 → 2s to next bar, 2s back
+        #expect(MusicalMeasureDescription.timeToNearest(pulse: .bar, measure: measure, at: 2, direction: .forward) == 2.0)
+        #expect(MusicalMeasureDescription.timeToNearest(pulse: .bar, measure: measure, at: 2, direction: .backward) == -2.0)
+
+        // at t=4 (on a bar boundary) → should step one full bar
+        #expect(MusicalMeasureDescription.timeToNearest(pulse: .bar, measure: measure, at: 4, direction: .forward) == 4.0)
+    }
+
+    @Test func timeToNearest_eighth() throws {
+        let measure = MusicalMeasureDescription(timeSignature: ._4_4, bpm: .bpm60)
+        // eighth = 0.5s at 60 BPM; standing at t=0.5 → 0.5s either direction
+        #expect(MusicalMeasureDescription.timeToNearest(pulse: .eighth, measure: measure, at: 0.5, direction: .forward) == 0.5)
+        #expect(MusicalMeasureDescription.timeToNearest(pulse: .eighth, measure: measure, at: 0.5, direction: .backward) == -0.5)
+    }
+
+    @Test func timeToNearest_sixteenth() throws {
+        let measure = MusicalMeasureDescription(timeSignature: ._4_4, bpm: .bpm60)
+        // sixteenth = 0.25s; standing at t=0.25 → 0.25s either direction
+        #expect(MusicalMeasureDescription.timeToNearest(pulse: .sixteenth, measure: measure, at: 0.25, direction: .forward) == 0.25)
+        #expect(MusicalMeasureDescription.timeToNearest(pulse: .sixteenth, measure: measure, at: 0.25, direction: .backward) == -0.25)
+    }
+
     @Test func timeToNearest_partials() throws {
         #expect(
             try MusicalMeasureDescription.timeToNearest(
