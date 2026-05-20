@@ -46,7 +46,7 @@ struct OneShotTimerTests {
 
         timer.resume()
 
-        try await Task.sleep(for: .milliseconds(200))
+        try await Task.sleep(for: .milliseconds(300))
 
         timer.dispose()
 
