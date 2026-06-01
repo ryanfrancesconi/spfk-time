@@ -40,7 +40,7 @@ struct OneShotTimerTests {
 
     @Test func firesOnceAfterInterval() async throws {
         let counter = Counter()
-        let timer = OneShotTimer(timeInterval: 0.01, eventHandler: {
+        let timer = OneShotTimer(timeInterval: 0.001, eventHandler: {
             counter.increment()
         })
 
