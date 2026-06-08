@@ -8,6 +8,9 @@ import SwiftTimecode
 
 /// Factory for creating ``TimerModel`` instances of various types.
 public enum TimerFactory {
+    /// `TimerType` lives in `SPFKUtils`; alias keeps `TimerFactory.TimerType` call sites unchanged.
+    public typealias TimerType = SPFKUtils.TimerType
+
     /// 60 frames per second
     public static var fps60: TimeInterval {
         TimecodeFrameRate.fps60.frameDurationCMTime.seconds
@@ -16,22 +19,6 @@ public enum TimerFactory {
     /// 30 frames per second
     public static var fps30: TimeInterval {
         TimecodeFrameRate.fps30.frameDurationCMTime.seconds
-    }
-
-    /// Describes the kind of timer to create.
-    public enum TimerType: Equatable {
-        /// A main-thread `NSTimer` wrapper. Leeway is in milliseconds.
-        case basic(timeInterval: TimeInterval = fps30,
-                   leeway: Int = 100)
-
-        /// A single-fire `DispatchWorkItem` timer.
-        case oneShot(timeInterval: TimeInterval = fps30,
-                     qos: DispatchQoS = .default)
-
-        /// A `DispatchSourceTimer` that fires repeatedly. Leeway is in milliseconds.
-        case repeating(timeInterval: TimeInterval = fps30,
-                       qos: DispatchQoS = .default,
-                       leeway: Int = 100)
     }
 
     /// Creates and returns a new timer of the specified type.

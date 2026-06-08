@@ -2,6 +2,7 @@
 
 import Foundation
 @testable import SPFKTime
+import SPFKUtils
 import Testing
 
 /// Thread-safe counter for testing async timer callbacks
