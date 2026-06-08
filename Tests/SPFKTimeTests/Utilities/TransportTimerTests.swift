@@ -2,6 +2,7 @@
 
 import Foundation
 @testable import SPFKTime
+import SPFKUtils
 import Testing
 
 /// A minimal mock that tracks resume/suspend/dispose calls without
