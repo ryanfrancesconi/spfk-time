@@ -127,6 +127,7 @@
             let hostTime = hostTime ?? mach_absolute_time()
 
             let avTime = AVAudioTime(hostTime: hostTime).offset(seconds: -time)
+            currentTime = time
             start(avTime: avTime)
         }
 
