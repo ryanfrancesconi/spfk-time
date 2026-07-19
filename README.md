@@ -236,8 +236,8 @@ Utilities/
 
 ## Requirements
 
-- **Swift** 6.2+
-- **macOS** 13+, **iOS** 16+
+- **Platforms:** macOS 13+, iOS 16+
+- **Swift:** 6.2+
 
 ## About
 
