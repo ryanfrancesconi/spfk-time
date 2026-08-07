@@ -181,53 +181,11 @@ CMTimeString.create(timecode: tc)  // "3612/24s"
 CMTimeString.create(seconds: 10.0, frameRate: .fps24)
 ```
 
-## Architecture
-
-```
-Definitions/
-  ├── TimeDomain                    — Time domain enum (realTime, timecode, musical)
-  ├── TimeDisplayFormat             — Display format choice (timecode vs seconds)
-  ├── TimeSignature                 — Musical time signatures with validation
-  ├── MusicalPulse                  — Beat subdivision enum (bar, quarter, eighth, sixteenth)
-  ├── MusicalPulseDescription       — Musical position from seconds (bar/beat/subdivision)
-  ├── MusicalMeasureDescription     — Tempo + time signature -> pulse durations
-  ├── VisualMusicalPulse            — Pixel widths for musical elements at a zoom level
-  ├── VisualMusicalTime             — Combined zoom/tempo/signature -> visual pulse
-  ├── TimelineDrawable              — Protocol for views mapping pixels <-> time
-  ├── TimelineRulerDrawingScale     — Zoom-dependent ruler spacing multipliers
-  └── TimelineRulerViewOptions      — Timeline ruler display configuration
-
-TimeFormatter/
-  ├── TimeFormatter                 — Multi-domain time display formatting
-  └── TimecodeDomain                — Timecode state, factory methods, frame rate conversion
-
-Timecode Extensions/
-  ├── SignedTimecode                — Positive/negative timecode wrapper
-  ├── Timecode Parse                — Flexible timecode string parsing
-  ├── Timecode Properties           — Rounding, CMTime conversion, zero convenience
-  └── FrameRate Extensions          — Float value, frame duration, legacy string init
-
-Utilities/
-  ├── CMTimeString                  — FCPXML time string parsing and creation
-  ├── CMTime+Utilities              — CMTime extensions (stringValue, .one, video timescale)
-  └── Timers/
-      ├── TimerModel                — Timer protocol (resume, suspend, dispose)
-      ├── TimerState                — Timer state enum (suspended, resumed)
-      ├── TimerFactory              — Factory for creating timer instances
-      ├── BasicTimer                — Main-thread NSTimer wrapper
-      ├── OneShotTimer              — Single-fire DispatchWorkItem timer
-      ├── RepeatingTimer            — DispatchSourceTimer wrapper (crash-safe resume)
-      ├── TransportTimer            — Display-linked playback timer (AVAudioTime sync)
-      ├── TransportTimerEvent       — Transport state and elapsed-time events
-      ├── DisplayLinkTimer          — CADisplayLink wrapper (macOS 14+)
-      ├── LegacyDisplayLinkTimer    — CVDisplayLink fallback (pre-macOS 14)
-      └── DisplayLink               — Core CVDisplayLink wrapper (deprecated)
-```
-
 ## Dependencies
 
 | Package | Purpose |
 |---------|---------|
+| [spfk-audio-base](https://github.com/ryanfrancesconi/spfk-audio-base) | Audio type definitions for timeline coordinates |
 | [spfk-base](https://github.com/ryanfrancesconi/spfk-base) | Foundation extensions, logging, error utilities |
 | [spfk-utils](https://github.com/ryanfrancesconi/spfk-utils) | String utilities, collection extensions |
 | [swift-timecode](https://github.com/orchetect/swift-timecode) | Core timecode types and frame rate definitions |
