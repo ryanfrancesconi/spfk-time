@@ -31,25 +31,6 @@ public struct TimecodeDomain {
     /// For fractional rates this differs slightly from 1.0.
     public private(set) var timecodeSecond: TimeInterval = 1
 
-    /// Multiplier applied for fractional/drop frame rates (1.0 for integer rates).
-    public private(set) var frameRateMultiplier: Double = 1
-
-    /// Combined multiplier for advancing time, accounting for fractional frame rates.
-    public private(set) var timeAdvanceMultiplier: Double = 1
-
-    var isFractional: Bool {
-        frameRate == .fps23_976 ||
-            frameRate == .fps24_98 ||
-            frameRate == .fps29_97 ||
-            frameRate == .fps47_952 ||
-            frameRate == .fps59_94 ||
-            frameRate == .fps119_88
-    }
-
-    var isDrop: Bool {
-        frameRate.isDrop
-    }
-
     /// The current timecode position.
     public private(set) var masterTimecode: Timecode
 
@@ -72,23 +53,16 @@ public struct TimecodeDomain {
         updateProperties()
     }
 
-    /// Recalculates derived values (`timecodeSecond`, multipliers) from the current frame rate.
+    /// Recalculates `timecodeSecond` from the current frame rate.
     public mutating func updateProperties() {
         let hour = Timecode.Components(h: 1)
 
         guard let oneHourTimecode = try? Timecode(.components(hour), at: frameRate) else { return }
 
-        self.timecodeSecond = isDrop ?
-            oneHourTimecode.realTimeValue / 3600 / 1.001 :
-            oneHourTimecode.realTimeValue / 3600
-
-        self.frameRateMultiplier = isFractional || isDrop ? 1.001 : 1
-
-        timeAdvanceMultiplier = frameRateMultiplier
-
-        if isFractional {
-            timeAdvanceMultiplier *= 1.001
-        }
+        // One hour of timecode divided by its own 3600 seconds. Drop frame is not a special
+        // case: dropping frame numbers is what makes its hour take ~3600 real seconds, so
+        // the measurement already accounts for it.
+        timecodeSecond = oneHourTimecode.realTimeValue / 3600
     }
 
     // MARK: - Frame Rate

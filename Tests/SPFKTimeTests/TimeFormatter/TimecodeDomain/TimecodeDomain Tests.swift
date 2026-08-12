@@ -198,24 +198,38 @@ class TimecodeDomainTests {
         #expect(tc.upperLimit == .max24Hours)
     }
 
-    @Test func testTimecodeSecond() throws {
-        let allCases = TimecodeFrameRate.allCases
-
-        for value in allCases {
+    /// An hour of timecode is 3600 timecode seconds, at every rate.
+    @Test func testTimecodeSecondMeasuresAnHourOfTimecode() throws {
+        for value in TimecodeFrameRate.allCases {
             _ = td.setFrameRate(
                 to: value,
                 preservingValuesIfPossible: false,
                 clampPositionToStartTimecode: true
             )
 
-            if td.frameRate.isDrop {
-                #expect(td.timecodeSecond < 1)
+            let hour = try Timecode(.components(Timecode.Components(h: 1)), at: value)
 
-            } else {
-                #expect(td.timecodeSecond >= 1)
-            }
+            #expect(
+                abs(td.timecodeSecond * 3600 - hour.realTimeValue) < 0.001,
+                "\(value): \(td.timecodeSecond) × 3600 vs \(hour.realTimeValue)s"
+            )
+        }
+    }
 
-            Log.debug(td.frameRate, "timecodeSecond: ", td.timecodeSecond)
+    /// NTSC drop frame drops frame *numbers* precisely so the count tracks wall clock, so a
+    /// timecode second there is a real second — unlike its non-drop twin, which runs 0.1% slow.
+    @Test func testNTSCDropFrameTracksWallClock() throws {
+        for value in [TimecodeFrameRate.fps29_97d, .fps59_94d] {
+            _ = td.setFrameRate(
+                to: value,
+                preservingValuesIfPossible: false,
+                clampPositionToStartTimecode: true
+            )
+
+            #expect(
+                abs(td.timecodeSecond - 1) < 0.0001,
+                "\(value) says a timecode second is \(td.timecodeSecond) real seconds"
+            )
         }
     }
 }
