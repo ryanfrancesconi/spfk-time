@@ -33,10 +33,10 @@ public struct TimelineRulerViewOptions: Equatable, Codable, Sendable {
     /// Whether to draw a horizontal center line through the ruler.
     public var drawCenterLine: Bool = false
 
-    /// Whether to draw vertical grid lines.
+    /// Whether to draw horizontal grid lines across the ruler's center area.
     public var drawGrid: Bool = false
 
-    /// The spacing in points between vertical grid lines.
+    /// The vertical spacing in points between horizontal grid lines.
     public var gridSpacing: CGFloat = 50
 
     public init(
