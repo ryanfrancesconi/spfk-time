@@ -1,5 +1,6 @@
 // Copyright Ryan Francesconi. All Rights Reserved. Revision History at https://github.com/ryanfrancesconi/spfk-time
 
+import Foundation
 import Numerics
 @testable import SPFKTime
 import Testing
@@ -154,5 +155,32 @@ struct TimeFormatterTests {
 
         #expect(tt.primaryString == "01:00:03:14")
         #expect(tt.realTime.masterSeconds == 0.0)
+    }
+
+    // MARK: - Start offset per domain
+
+    /// The start offset belongs to the timecode domain alone, which is what lets a user pick Real
+    /// Time to see a file with a start timecode counting from 0:00.
+    @Test(arguments: [0.0, 10.0, 125.5] as [TimeInterval])
+    func realTimeCountsFromZeroThroughAStartOffset(elapsed: TimeInterval) throws {
+        let start = try Timecode(.components(h: 1), at: .fps30)
+
+        var offset = TimeFormatter(primaryDomain: .realTime)
+        offset.update(frameRate: .fps30)
+        try offset.update(start: start)
+
+        var zeroed = TimeFormatter(primaryDomain: .realTime)
+        zeroed.update(frameRate: .fps30)
+
+        offset.update(elapsedTime: elapsed)
+        zeroed.update(elapsedTime: elapsed)
+
+        #expect(offset.primaryString == zeroed.primaryString)
+        #expect(offset.realTime.masterSeconds == elapsed)
+
+        // The same formatter switched to timecode does carry the offset, so the equality above is
+        // a property of the domain rather than of a start that never took.
+        offset.primaryDomain = .timecode
+        #expect(offset.primaryString.hasPrefix("01:"))
     }
 }

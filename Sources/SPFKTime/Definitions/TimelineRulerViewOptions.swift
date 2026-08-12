@@ -2,33 +2,30 @@
 
 import Foundation
 
-/// Configuration for a dual-ruler timeline header.
+/// Configuration for a timeline ruler header.
 public struct TimelineRulerViewOptions: Equatable, Codable, Sendable {
-    /// The type of time representation shown in a ruler lane.
-    public enum DisplayType: Equatable, Codable, Sendable {
-        /// Wall-clock seconds.
+    /// The type of time representation shown in a ruler's time lane.
+    public enum DisplayType: String, Equatable, Codable, Sendable {
+        /// Wall-clock seconds, elapsed from the start of the file.
         case realTime
-        /// SMPTE timecode.
+        /// SMPTE timecode, offset by the file's start timecode.
         case timecode
-        /// Musical bars and beats.
-        case musical
-        /// Ruler lane is hidden.
+        /// The time lane is hidden.
         case none
 
         public var timeDomain: TimeDomain {
             switch self {
             case .realTime, .none: .realTime
             case .timecode: .timecode
-            case .musical: .musical
             }
         }
     }
 
-    /// The time domain shown in the top ruler lane.
-    public var topRuler: DisplayType = .realTime
+    /// The time representation shown in the ruler's time lane.
+    public var timeDisplay: DisplayType = .realTime
 
-    /// The time domain shown in the bottom ruler lane.
-    public var bottomRuler: DisplayType = .musical
+    /// Whether the ruler draws musical bars below the time lane.
+    public var showsBarNumbers: Bool = true
 
     /// Whether to draw a horizontal center line through the ruler.
     public var drawCenterLine: Bool = false
@@ -40,10 +37,10 @@ public struct TimelineRulerViewOptions: Equatable, Codable, Sendable {
     public var gridSpacing: CGFloat = 50
 
     public init(
-        topRuler: DisplayType = .realTime,
-        bottomRuler: DisplayType = .musical
+        timeDisplay: DisplayType = .realTime,
+        showsBarNumbers: Bool = true
     ) {
-        self.topRuler = topRuler
-        self.bottomRuler = bottomRuler
+        self.timeDisplay = timeDisplay
+        self.showsBarNumbers = showsBarNumbers
     }
 }
