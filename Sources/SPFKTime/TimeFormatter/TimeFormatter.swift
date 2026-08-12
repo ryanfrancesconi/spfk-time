@@ -122,6 +122,30 @@ extension TimeFormatter {
         }
     }
 
+    /// Reads a string the user typed into a readout showing ``primaryDomain``, as elapsed time from
+    /// the timeline's zero. `nil` when it does not parse in that domain.
+    ///
+    /// The inverse of ``primaryString``, and it has to be: a readout that formats in one domain and
+    /// parses in another shows a value the user cannot type back. In `.timecode` the string is an
+    /// absolute position, so the start offset comes back off — the exact opposite of what
+    /// ``update(elapsedTime:)`` adds.
+    ///
+    /// A value before the timeline's zero parses to a negative, matching what the real-time domain
+    /// has always done with a leading `-`. Clamping belongs to whatever consumes the position.
+    public func elapsedTime(fromPrimaryString string: String) -> TimeInterval? {
+        switch primaryDomain {
+        case .realTime:
+            RealTimeDomain.seconds(string: string)
+
+        case .timecode:
+            (try? timecode.formNewTimecode(string: string))
+                .map { $0.realTimeValue - (timecode.startTimecode?.realTimeValue ?? 0) }
+
+        case .musical:
+            nil
+        }
+    }
+
     /// Returns the master time display in the format determined by the `.primaryDomain` property.
     public func primaryString(seconds: TimeInterval) -> String {
         switch primaryDomain {
