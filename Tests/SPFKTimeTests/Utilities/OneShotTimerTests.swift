@@ -47,7 +47,15 @@ struct OneShotTimerTests {
 
         timer.resume()
 
-        try await Task.sleep(for: .milliseconds(300))
+        // Poll rather than sleep a fixed interval: a parallelized run can starve a 1 ms
+        // dispatch timer well past any constant that still reads as short.
+        let deadline = ContinuousClock.now + .seconds(5)
+        while counter.value == 0, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+
+        // A one-shot must not repeat, so give it room to fire again before asserting.
+        try await Task.sleep(for: .milliseconds(50))
 
         timer.dispose()
 
