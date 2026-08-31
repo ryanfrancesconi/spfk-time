@@ -18,168 +18,61 @@ SPFKTime provides three core capabilities:
 
 ### TimeFormatter
 
-Primary interface for managing time across domains. Wraps both a `TimecodeDomain` and a `RealTimeDomain`, producing formatted strings for display based on the active `primaryDomain`.
-
-```swift
-var formatter = TimeFormatter(primaryDomain: .timecode)
-formatter.update(frameRate: .fps24)
-formatter.update(start: startTimecode)
-formatter.update(elapsedTime: 3.5)
-formatter.primaryString  // "00:00:03:12" (at 24fps)
-```
+The primary interface for managing time across domains. It wraps a `TimecodeDomain` and a
+`RealTimeDomain` together and produces the display string for whichever `primaryDomain` is active,
+so a UI switching between real time and timecode reads one property rather than branching.
+`TimeDomain` names the three — real time, timecode, bars — and carries a label for each.
+`TimeDisplayFormat` says how a value is written out.
 
 ### TimecodeDomain
 
-Manages SMPTE timecode state including frame rate, start offset, and current position. Provides factory methods for creating `Timecode` values with consistent base settings and handles frame rate conversion with strategies matching Pro Tools (preserve values) and Cubase (convert values) behavior.
-
-```swift
-let domain = TimecodeDomain()
-
-// Create timecode values using factory methods
-let tc = domain.formNewTimecode(wrappingRealTimeSeconds: 10.0)
-let fromString = try domain.formNewTimecode(string: "01:00:00:00")
-
-// Frame rate conversion preserving timecode values (Pro Tools behavior)
-let preserved = try domain.formNewTimecode(
-    preservingValuesFrom: sourceTimecode
-)
-
-// Frame rate conversion using real-time position (Cubase behavior)
-let converted = try domain.formNewTimecode(
-    convertingFrom: sourceTimecode
-)
-
-// Signed timecode for offset display
-let signed = domain.formNewSignedTimecode(
-    seconds: -3.5,
-    offsetFromStart: true
-)
-signed.stringValue()  // "-00:00:03:12"
-```
+Manages SMPTE timecode state — frame rate, start offset, current position — and vends `Timecode`
+values with consistent base settings. Frame-rate conversion offers both strategies the industry
+splits on: preserving the timecode values as Pro Tools does, or converting through the real-time
+position as Cubase does. `SignedTimecode` covers offset display, where a value can be negative.
 
 ### Timecode Parsing
 
-Flexible timecode string parsing supporting multiple delimiter styles and undelimited shorthand entry (right-to-left digit assignment).
-
-```swift
-// Standard delimiters (: ; .)
-Timecode.parseUnformattedTimecode(string: "01:00:10:15", frameRate: .fps24)
-// -> h1 m0 s10 f15
-
-// Semicolons (drop-frame style)
-Timecode.parseUnformattedTimecode(string: "01;00;10;15", frameRate: .fps29_97d)
-
-// Undelimited shorthand -- digits fill frames first, then right-to-left
-Timecode.parseUnformattedTimecode(string: "11015", frameRate: .fps24)
-// -> 00:01:10:15
-
-// Short entry
-Timecode.parseUnformattedTimecode(string: "1:1", frameRate: .fps24)
-// -> 00:00:01:01
-```
+Flexible string parsing across delimiter styles — colons, semicolons for drop-frame, periods — plus
+undelimited shorthand, where digits fill frames first and then assign right to left, so `11015`
+reads as `00:01:10:15` and `1:1` as `00:00:01:01`.
 
 ### TransportTimer
 
-Display-linked playback timer that bridges screen refresh to the audio sync domain via `AVAudioTime` / `mach_absolute_time`. Uses `CADisplayLink` on macOS 14+ with automatic `CVDisplayLink` fallback on earlier systems.
-
-```swift
-// Bind to a view's display
-let timer = TransportTimer(on: view)
-
-timer.eventHandler = { event in
-    switch event {
-    case .state(let playState):
-        print(playState.isPlaying)  // true for .start/.resume
-    case .time(let elapsed):
-        print(elapsed)  // seconds since start
-    case .complete:
-        break
-    }
-}
-
-timer.start(at: 0.0)       // begin from 0s
-timer.pause()               // freeze position
-timer.resume()              // continue from paused position
-timer.stop()                // stop playback
-timer.currentTime           // last elapsed time
-timer.fps                   // display refresh rate
-```
+Display-linked playback timer bridging screen refresh to the audio sync domain via `AVAudioTime` /
+`mach_absolute_time`. Uses `CADisplayLink` on macOS 14+ with an automatic `CVDisplayLink` fallback
+on earlier systems. It reports `TransportTimerEvent` values — state changes, elapsed time and
+completion — and `TransportTimerPlayState` says whether the transport is running.
 
 ### Musical Time
 
-Types for tempo-aware musical time representation, position tracking, and visual rendering.
+Types for tempo-aware musical time representation, position tracking and visual rendering.
 
-```swift
-// Define a measure from tempo + time signature
-let measure = MusicalMeasureDescription(
-    timeSignature: ._4_4,
-    bpm: Bpm(120)
-)
-measure.duration(pulse: .bar)       // 2.0 seconds
-measure.duration(pulse: .quarter)   // 0.5 seconds
-measure.barsPerSecond               // 0.5
+| Type | Description |
+|------|-------------|
+| **`MusicalPulse`** | A note division — bar, quarter, eighth and the rest |
+| **`TimeSignature`** | Numerator and denominator |
+| **`MusicalMeasureDescription`** | Tempo and signature together — one bar's shape |
+| **`MusicalPulseDescription`** | A 1-based bar/beat/subdivision position, updated from a time |
+| **`VisualMusicalPulse`** | The pixel width of each division at a given zoom |
+| **`VisualMusicalTime`** | Zoom, tempo and signature combined, recomputing the pulse when any changes |
 
-// Snap to nearest musical boundary
-let offset = MusicalMeasureDescription.timeToNearest(
-    pulse: .quarter,
-    measure: measure,
-    at: 1.3,
-    direction: .forward
-)
+## Timeline drawing
 
-// Musical position display (1-based bar/beat/subdivision)
-var position = MusicalPulseDescription()
-position.measure = measure
-position.update(time: 5.0)
-position.stringValue  // "3 1 1" (bar 3, beat 1, subdivision 1)
+`TimelineDrawable` is what a view conforms to in order to map between pixel coordinates and time —
+rulers, waveform displays, the video filmstrip. `TimelineRulerViewOptions` configures a ruler
+header, and `TimelineRulerDrawingScale` picks which divisions are legible at the current zoom.
 
-// Pixel layout for timeline drawing
-let visual = try VisualMusicalPulse(
-    pixelsPerSecond: 100,
-    measure: measure
-)
-visual.width(of: .bar)      // 200.0 pixels
-visual.width(of: .quarter)  // 50.0 pixels
-```
+## Timer factory
 
-### Timer Factory
+`TimerFactory` builds general-purpose timers for non-transport use — a main-thread `NSTimer`, a
+single-fire delayed one, and a background repeating one at a chosen QoS. All conform to
+`TimerModel`.
 
-General-purpose timers for non-transport use cases. All conform to the `TimerModel` protocol.
+## CMTime utilities
 
-```swift
-// Main-thread NSTimer
-let basic = TimerFactory.createTimer(.basic(timeInterval: 1.0 / 30))
-
-// Single-fire delayed execution
-let oneShot = TimerFactory.createTimer(.oneShot(timeInterval: 0.5))
-
-// Background repeating timer
-let repeating = TimerFactory.createTimer(
-    .repeating(timeInterval: TimerFactory.fps60, qos: .userInteractive)
-)
-
-repeating.eventHandler = { /* called each tick */ }
-repeating.resume()
-repeating.suspend()
-repeating.dispose()
-```
-
-### CMTime Utilities
-
-FCPXML-compatible `CMTime` string formatting and parsing.
-
-```swift
-// Format as FCPXML string
-let time = CMTime(value: 100, timescale: 24)
-time.stringValue  // "100/24s"
-
-// Parse from FCPXML string
-CMTimeString.parse(string: "100/24s")  // CMTime(value: 100, timescale: 24)
-
-// Create from timecode or seconds
-CMTimeString.create(timecode: tc)  // "3612/24s"
-CMTimeString.create(seconds: 10.0, frameRate: .fps24)
-```
+`CMTimeString` reads and writes the FCPXML `CMTime` form (`100/24s`), and builds one from a timecode
+or from seconds at a frame rate.
 
 ## Dependencies
 
