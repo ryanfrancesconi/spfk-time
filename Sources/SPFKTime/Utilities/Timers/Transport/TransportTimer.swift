@@ -33,7 +33,7 @@
         /// Creates a transport timer bound to the display containing the given view.
         @MainActor public init(on view: NSView) {
             defer {
-                internalTimer.eventHandler = handleTimerUpdateEvent
+                internalTimer.eventHandler = { [weak self] in self?.handleTimerUpdateEvent() }
             }
 
             if #available(macOS 14, *) {
@@ -47,7 +47,7 @@
         /// Creates a transport timer bound to the display containing the given window.
         @MainActor public init(on window: NSWindow) {
             defer {
-                internalTimer.eventHandler = handleTimerUpdateEvent
+                internalTimer.eventHandler = { [weak self] in self?.handleTimerUpdateEvent() }
             }
 
             if #available(macOS 14, *) {
@@ -65,7 +65,7 @@
             }
 
             defer {
-                internalTimer.eventHandler = handleTimerUpdateEvent
+                internalTimer.eventHandler = { [weak self] in self?.handleTimerUpdateEvent() }
             }
 
             if #available(macOS 14, *) {
@@ -79,13 +79,13 @@
         @available(macOS, deprecated: 14.0, message: "Use view based timer")
         public init(dispatchQueue: DispatchQueue) {
             internalTimer = LegacyDisplayLinkTimer(onQueue: dispatchQueue)
-            internalTimer.eventHandler = handleTimerUpdateEvent
+            internalTimer.eventHandler = { [weak self] in self?.handleTimerUpdateEvent() }
         }
 
         /// Internal initializer for testing with an injected timer
         init(timer: TimerModel) {
             internalTimer = timer
-            internalTimer.eventHandler = handleTimerUpdateEvent
+            internalTimer.eventHandler = { [weak self] in self?.handleTimerUpdateEvent() }
         }
 
         deinit {

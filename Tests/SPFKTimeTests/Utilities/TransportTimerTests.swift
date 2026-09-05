@@ -43,6 +43,22 @@
 
     @Suite("TransportTimer")
     struct TransportTimerTests {
+        // MARK: - Lifetime
+
+        /// The transport hands its internal timer a handler pointing back at itself. Captured
+        /// strongly that is a cycle through `internalTimer`, and a transport dropped without
+        /// `dispose()` is never freed.
+        @Test func aTransportIsReleasedWithoutDispose() {
+            weak var weakTimer: TransportTimer?
+
+            autoreleasepool {
+                let timer = TransportTimer(timer: MockTimerModel())
+                weakTimer = timer
+            }
+
+            #expect(weakTimer == nil, "the transport outlived its last reference")
+        }
+
         // MARK: - Initial state
 
         @Test func initialStateIsStopped() {
