@@ -18,7 +18,7 @@ let package = Package(
         .package(url: "https://github.com/ryanfrancesconi/spfk-audio-base", from: "1.6.1"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-utils", from: "1.6.1"),
         .package(url: "https://github.com/ryanfrancesconi/spfk-testing", from: "1.1.0"),
-        .package(url: "https://github.com/orchetect/swift-timecode", from: "3.0.0"),
+        .package(url: "https://github.com/orchetect/swift-timecode", from: "3.1.4"),
     ],
     targets: [
         .target(
