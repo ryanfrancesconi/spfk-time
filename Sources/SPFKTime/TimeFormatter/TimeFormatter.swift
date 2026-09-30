@@ -91,7 +91,6 @@ extension TimeFormatter {
         preservingValuesIfPossible: Bool = true
     ) {
         guard timecode.frameRate != frameRate else { return }
-        // Log.debug("⏰ frameRate to", frameRate.stringValue)
 
         _ = timecode.setFrameRate(
             to: frameRate,

@@ -65,8 +65,6 @@ public struct TimelineRulerDrawingScale {
             time = 1
             musical = 1
         }
-
-        // Log.debug("pixelsPerSecond", pixelsPerSecond, "time", time, "musical", musical)
     }
 
     public init() {}

@@ -28,7 +28,6 @@ class CMTimeStringTests {
                 CMTimeString.create(seconds: seconds, frameRate: frameRate)
             )
             // 13101/3200s
-            // Log.debug(string)
             let cmTime = try #require(
                 CMTimeString.parse(string: string)
             )
@@ -64,7 +63,6 @@ class CMTimeStringTests {
             Log.debug("\(frameRate.stringValue)", seconds, "vs", cmTime.seconds, string)
 
             #expect(cmTime.seconds.isApproximatelyEqual(to: seconds, relativeTolerance: 0.04))
-            // XCTAssertLessThanOrEqual(cmTime.seconds, seconds)
         }
     }
 

@@ -64,8 +64,6 @@ public struct MusicalPulseDescription: Hashable, Codable, Sendable {
         bar = Int(fractionalBar) + 1
         beat = Int(fractionalBeat) + 1
         subdivision = Int(fractionalSubdivision) + 1
-
-        // Swift.print(debugDescription)
     }
 }
 
