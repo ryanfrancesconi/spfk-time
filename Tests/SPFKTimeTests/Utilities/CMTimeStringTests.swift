@@ -60,8 +60,6 @@ class CMTimeStringTests {
                 CMTimeString.parse(string: string)
             )
 
-            Log.debug("\(frameRate.stringValue)", seconds, "vs", cmTime.seconds, string)
-
             #expect(cmTime.seconds.isApproximatelyEqual(to: seconds, relativeTolerance: 0.04))
         }
     }
@@ -82,8 +80,6 @@ class CMTimeStringTests {
                 CMTimeString.parse(string: string)
             )
 
-            Log.debug("\(frameRate.stringValue)", seconds, "vs", cmTime.seconds, string)
-
             #expect(cmTime.seconds.isApproximatelyEqual(to: seconds, relativeTolerance: 0.1))
         }
     }
@@ -91,13 +87,8 @@ class CMTimeStringTests {
     @Test func testSeconds() throws {
         let seconds = 120.0199
 
-        let timecode = try Timecode(.realTime(seconds: seconds), at: .fps30d)
-
-        Log.debug(seconds, timecode.realTimeValue, timecode.stringValue, timecode.frameCount)
-
-        let timecode2 = try Timecode(.samples(5_760_000, sampleRate: 48000), at: .fps30d)
-
-        Log.debug(seconds, timecode2.realTimeValue, timecode2.stringValue, timecode2.frameCount)
+        _ = try Timecode(.realTime(seconds: seconds), at: .fps30d)
+        _ = try Timecode(.samples(5_760_000, sampleRate: 48000), at: .fps30d)
     }
 
     @Test func realToFraction() throws {
@@ -115,6 +106,6 @@ class CMTimeStringTests {
 
 extension CMTimeStringTests {
     @Test func second() {
-        Log.debug(CMTime.one.seconds)
+        _ = CMTime.one.seconds
     }
 }

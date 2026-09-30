@@ -32,8 +32,6 @@ struct MusicalMeasureDescriptionTests {
         let _6_8 = MusicalMeasureDescription(timeSignature: ._6_8, bpm: .bpm60)
         let _12_16 = MusicalMeasureDescription(timeSignature: ._12_16, bpm: .bpm60)
 
-        Log.debug(_3_4.testValue, _6_8.testValue, _12_16.testValue)
-
         #expect(_3_4.duration(pulse: .bar) == 3)
         #expect(_6_8.duration(pulse: .bar) == 3)
         #expect(_12_16.duration(pulse: .bar) == 3)

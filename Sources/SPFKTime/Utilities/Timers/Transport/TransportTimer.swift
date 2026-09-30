@@ -88,10 +88,6 @@
             internalTimer.eventHandler = { [weak self] in self?.handleTimerUpdateEvent() }
         }
 
-        deinit {
-            Log.debug("- { \(self) }")
-        }
-
         /// Permanently stops the timer and releases the event handler.
         public func dispose() {
             internalTimer.dispose()

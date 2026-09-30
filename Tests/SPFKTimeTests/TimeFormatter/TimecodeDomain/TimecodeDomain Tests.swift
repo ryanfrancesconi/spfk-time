@@ -21,8 +21,6 @@ class TimecodeDomainTests {
         #expect(td.properties.frameRate == .fps24)
         #expect(td.stringFormat == [])
 
-        Log.debug("Created new", td)
-
         return td
     }()
 
