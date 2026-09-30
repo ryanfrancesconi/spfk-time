@@ -12,7 +12,7 @@ SPFKTime provides three core capabilities:
 
 - **Time Domains** — Unified handling of real time (seconds), SMPTE timecode, and musical time (bars/beats) with conversion between domains.
 - **Timecode Extensions** — Flexible timecode parsing, frame rate conversion, signed timecode, and CMTime interop built on top of [SwiftTimecode](https://github.com/orchetect/swift-timecode).
-- **High-Precision Timers** — Display-linked transport timers synced to screen refresh rate, plus basic and one-shot timer variants.
+- **High-Precision Timers** — Display-linked transport timers synced to screen refresh rate.
 
 ## Key Types
 
@@ -62,12 +62,6 @@ Types for tempo-aware musical time representation, position tracking and visual 
 `TimelineDrawable` is what a view conforms to in order to map between pixel coordinates and time —
 rulers, waveform displays, the video filmstrip. `TimelineRulerViewOptions` configures a ruler
 header, and `TimelineRulerDrawingScale` picks which divisions are legible at the current zoom.
-
-## Timer factory
-
-`TimerFactory` builds general-purpose timers for non-transport use — a main-thread `NSTimer`, a
-single-fire delayed one, and a background repeating one at a chosen QoS. All conform to
-`TimerModel`.
 
 ## CMTime utilities
 
