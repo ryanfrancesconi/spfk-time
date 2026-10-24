@@ -12,6 +12,10 @@ public enum TransportTimerEvent: Sendable {
 
     /// The transport reached the end of its content.
     case complete
+
+    /// A scheduled rate change took effect: the position now advances at `rate` from
+    /// `originHostTime`, where it would be zero.
+    case retimed(rate: Double, originHostTime: UInt64)
 }
 
 /// The playback state reported by a ``TransportTimer``.

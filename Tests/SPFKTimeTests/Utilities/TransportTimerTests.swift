@@ -2,6 +2,7 @@
 
 #if os(macOS)
 
+    import AVFoundation
     import Foundation
     @testable import SPFKTime
     import SPFKUtils
@@ -315,6 +316,134 @@
             let timer = TransportTimer(timer: mock)
 
             #expect(timer.fps == mock.fps)
+        }
+    
+        // MARK: - Rate
+
+        /// A host clock the test advances by hand.
+        private final class HostClock {
+            var seconds: TimeInterval = 1000
+            var ticks: UInt64 { AVAudioTime.hostTime(forSeconds: seconds) }
+        }
+
+        private func makeTimer() -> (TransportTimer, MockTimerModel, HostClock) {
+            let mock = MockTimerModel()
+            let timer = TransportTimer(timer: mock)
+            let host = HostClock()
+            timer.hostClock = { host.ticks }
+            return (timer, mock, host)
+        }
+
+        @Test func startAtHalfRate() {
+            let (timer, mock, host) = makeTimer()
+            timer.start(at: 10, hostTime: host.ticks, rate: 0.5)
+
+            host.seconds += 2
+            mock.fireTick()
+
+            #expect(abs(timer.currentTime - 11) < 1e-6)
+            #expect(timer.rate == 0.5)
+        }
+
+        /// The defaults are the timer as it was: position is elapsed time since `hostTime − time`.
+        @Test func defaultsReproduceARateOneStart() {
+            let (timer, mock, host) = makeTimer()
+            let start = host.ticks
+            timer.start(at: 3, hostTime: start)
+
+            host.seconds += 1.5
+            mock.fireTick()
+
+            #expect(abs(timer.currentTime - 4.5) < 1e-6)
+            #expect(abs(AVAudioTime.seconds(forHostTime: timer.avStartTime.hostTime) - (1000 - 3)) < 1e-6)
+        }
+
+        @Test func aRetimeIsContinuousAndSendsRetimedOnceWhenItTakesEffect() {
+            let (timer, mock, host) = makeTimer()
+            var retimed: [Double] = []
+            timer.eventHandler = { event in
+                if case let .retimed(rate, _) = event { retimed.append(rate) }
+            }
+
+            timer.start(at: 0, hostTime: host.ticks)
+            timer.retime(rate: 0.5, atHostTime: AVAudioTime.hostTime(forSeconds: 1001))
+
+            host.seconds = 1000.9
+            mock.fireTick()
+            #expect(retimed.isEmpty)
+            #expect(abs(timer.currentTime - 0.9) < 1e-6)
+
+            host.seconds = 1001.2
+            mock.fireTick()
+            #expect(retimed == [0.5])
+            #expect(abs(timer.currentTime - 1.1) < 1e-6)
+
+            host.seconds = 1002
+            mock.fireTick()
+            #expect(retimed == [0.5])
+            #expect(abs(timer.currentTime - 1.5) < 1e-6)
+        }
+
+        @Test func aRetimeWhileStoppedIsIgnored() {
+            let (timer, _, host) = makeTimer()
+            timer.retime(rate: 2, atHostTime: host.ticks)
+            #expect(timer.clock.pendingChanges.isEmpty)
+        }
+
+        @Test func startAvTimeKeepsTheRate() {
+            let (timer, mock, host) = makeTimer()
+            timer.start(at: 0, hostTime: host.ticks, rate: 2)
+            timer.stop()
+
+            timer.start(avTime: AVAudioTime(hostTime: AVAudioTime.hostTime(forSeconds: 999)))
+            mock.fireTick()
+
+            #expect(timer.rate == 2)
+            #expect(abs(timer.currentTime - 2) < 1e-6)
+        }
+
+        /// A loop's wrap restarts at the rate reached by its time, keeping a change scheduled after it.
+        @Test func restartTakesTheRateReachedAndKeepsLaterChanges() {
+            let (timer, mock, host) = makeTimer()
+            timer.start(at: 0, hostTime: host.ticks)
+            timer.retime(rate: 0.5, atHostTime: AVAudioTime.hostTime(forSeconds: 1001))
+            timer.retime(rate: 2, atHostTime: AVAudioTime.hostTime(forSeconds: 1004))
+
+            timer.restart(at: 10, hostTime: AVAudioTime.hostTime(forSeconds: 1002))
+            #expect(timer.rate == 0.5)
+
+            host.seconds = 1003
+            mock.fireTick()
+            #expect(abs(timer.currentTime - 10.5) < 1e-6)
+
+            host.seconds = 1005
+            mock.fireTick()
+            #expect(abs(timer.currentTime - (11 + 2)) < 1e-6)
+        }
+
+        @Test func hostTimeForSourceRoundTrips() {
+            let (timer, _, host) = makeTimer()
+            timer.start(at: 4, hostTime: host.ticks, rate: 0.75)
+            timer.retime(rate: 1.5, atHostTime: AVAudioTime.hostTime(forSeconds: 1002))
+
+            for position in stride(from: 4.0, through: 9, by: 0.5) {
+                #expect(abs(timer.position(atHostTime: timer.hostTime(forSource: position)) - position) < 1e-6)
+            }
+        }
+
+        @Test func resumeKeepsTheRate() {
+            let (timer, mock, host) = makeTimer()
+            timer.start(at: 0, hostTime: host.ticks, rate: 0.5)
+            host.seconds += 2
+            mock.fireTick()
+            timer.pause()
+
+            host.seconds += 10
+            timer.resume()
+            host.seconds += 2
+            mock.fireTick()
+
+            #expect(abs(timer.currentTime - 2) < 1e-6)
         }
     }
 

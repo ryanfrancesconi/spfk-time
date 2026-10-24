@@ -42,7 +42,9 @@ reads as `00:01:10:15` and `1:1` as `00:00:01:01`.
 Display-linked playback timer bridging screen refresh to the audio sync domain via `AVAudioTime` /
 `mach_absolute_time`. Uses `CADisplayLink` on macOS 14+ with an automatic `CVDisplayLink` fallback
 on earlier systems. It reports `TransportTimerEvent` values — state changes, elapsed time and
-completion — and `TransportTimerPlayState` says whether the transport is running.
+completion — and `TransportTimerPlayState` says whether the transport is running. Its position is a
+`TransportClock`: source seconds advancing at a playback rate from a start host time, with scheduled
+rate changes folding it where they are heard.
 
 ### Musical Time
 

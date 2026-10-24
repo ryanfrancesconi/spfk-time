@@ -20,13 +20,25 @@
         /// `true` when the transport is paused (position preserved for resume).
         public private(set) var isPaused: Bool = false
 
-        /// The current position of the playhead in fractional seconds.
-        /// This is real time seconds. Can only be set when the timer isn't running.
+        /// The current position of the playhead in source seconds. Can only be set when the timer
+        /// isn't running.
         public var currentTime: TimeInterval = 0
 
-        public private(set) var avStartTime = AVAudioTime.now()
+        /// The position as a function of host time, set by a start.
+        public private(set) var clock = TransportClock(hostTime: AVAudioTime.seconds(forHostTime: mach_absolute_time()))
+
+        /// The host time at which the position would be zero at the current rate.
+        public var avStartTime: AVAudioTime {
+            AVAudioTime(hostTime: AVAudioTime.hostTime(forSeconds: max(0, clock.origin)))
+        }
+
+        /// Source seconds per second of playback.
+        public var rate: Double { clock.rate }
 
         private let internalTimer: TimerModel
+
+        /// The host clock, injectable for tests.
+        var hostClock: () -> UInt64 = { mach_absolute_time() }
 
         // MARK: - Init
 
@@ -96,43 +108,74 @@
 
         /// Received event from the timer, called on the screen refresh rate
         private func handleTimerUpdateEvent() {
-            let avNow = AVAudioTime(hostTime: mach_absolute_time())
+            let now = AVAudioTime.seconds(forHostTime: hostClock())
 
-            // Find the difference between current time and start time.
-            guard let elapsedTime = avNow.timeIntervalSince(otherTime: avStartTime) else {
-                return
+            if clock.applyChanges(through: now) > 0 {
+                send(event: .retimed(rate: clock.rate, originHostTime: avStartTime.hostTime))
             }
 
-            currentTime = elapsedTime
+            currentTime = clock.position(at: now)
 
-            send(event: .time(elapsedTime))
+            send(event: .time(currentTime))
         }
 
-        /// Starts playback, treating `time` as the initial elapsed position.
+        /// Starts playback with `time` heard at `hostTime`, advancing at `rate` source seconds per
+        /// second. Before `hostTime` the position stays at `time`.
         ///
         /// - Parameters:
-        ///   - time: The initial elapsed time in seconds.
+        ///   - time: The start position in source seconds.
         ///   - hostTime: Optional `mach_absolute_time` anchor; defaults to now.
+        ///   - rate: Source seconds per second of playback.
         public func start(
             at time: TimeInterval,
-            hostTime: UInt64? = nil
+            hostTime: UInt64? = nil,
+            rate: Double = 1
         ) {
             guard !isRunning else {
                 Log.error("Transport is already running")
                 return
             }
 
-            let hostTime = hostTime ?? mach_absolute_time()
-
-            let avTime = AVAudioTime(hostTime: hostTime).offset(seconds: -time)
+            let hostTime = hostTime ?? hostClock()
+            clock = TransportClock(position: time, hostTime: AVAudioTime.seconds(forHostTime: hostTime), rate: rate)
             currentTime = time
-            start(avTime: avTime)
+            resumeAndSendStart()
         }
 
-        /// Starts playback anchored to the given `AVAudioTime`.
+        /// Starts playback with position zero at `avTime`, keeping the current rate and any scheduled
+        /// rate change.
         public func start(avTime: AVAudioTime) {
-            avStartTime = avTime
+            clock.reanchor(position: 0, hostTime: AVAudioTime.seconds(forHostTime: avTime.hostTime))
+            resumeAndSendStart()
+        }
 
+        /// Starts again with `time` heard at `hostTime`, at the rate reached by then and keeping any
+        /// later scheduled change, as a loop's wrap does. Before `hostTime` the position stays at `time`.
+        public func restart(at time: TimeInterval, hostTime: UInt64) {
+            clock.reanchor(position: time, hostTime: AVAudioTime.seconds(forHostTime: hostTime))
+            currentTime = time
+            resumeAndSendStart()
+        }
+
+        /// Schedules a new rate while running, first heard at `hostTime`. The position folds there,
+        /// continuous, and ``TransportTimerEvent/retimed(rate:originHostTime:)`` is sent on the first
+        /// tick that reaches it.
+        public func retime(rate: Double, atHostTime hostTime: UInt64) {
+            guard isRunning else { return }
+            clock.changeRate(to: rate, at: AVAudioTime.seconds(forHostTime: hostTime))
+        }
+
+        /// The source position heard at `hostTime`, scheduled rate changes included.
+        public func position(atHostTime hostTime: UInt64) -> TimeInterval {
+            clock.position(at: AVAudioTime.seconds(forHostTime: hostTime))
+        }
+
+        /// The host time at which source position `time` is heard.
+        public func hostTime(forSource time: TimeInterval) -> UInt64 {
+            AVAudioTime.hostTime(forSeconds: max(0, clock.hostTime(forPosition: time)))
+        }
+
+        private func resumeAndSendStart() {
             internalTimer.resume()
             send(event: .state(.start))
         }
@@ -159,8 +202,9 @@
             guard isPaused else { return }
             isPaused = false
 
-            let avTime = AVAudioTime(hostTime: mach_absolute_time()).offset(seconds: -currentTime)
-            avStartTime = avTime
+            clock = TransportClock(
+                position: currentTime, hostTime: AVAudioTime.seconds(forHostTime: hostClock()), rate: clock.rate
+            )
 
             internalTimer.resume()
             send(event: .state(.resume))
