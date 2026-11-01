@@ -11,8 +11,8 @@
     import SwiftExtensions
     import SwiftTimecode
 
-    /// Transport​Timer is a facade that wraps a platform-appropriate display link timer and bridges it
-    /// to the audio synchronization domain via AVAudio​Time / mach​_absolute​_time.
+    /// TransportTimer is a facade that wraps a platform-appropriate display link timer and bridges it
+    /// to the audio synchronization domain via AVAudioTime / mach_absolute_time.
     public class TransportTimer {
         /// Closure receiving ``TransportTimerEvent`` values (state changes and time updates).
         public var eventHandler: ((TransportTimerEvent) -> Void)?
