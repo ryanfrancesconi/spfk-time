@@ -4,86 +4,24 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-time%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ryanfrancesconi/spfk-time)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-time%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ryanfrancesconi/spfk-time)
 
-A Swift package for time representation, formatting, and high-precision timing across real-time, timecode (SMPTE), and musical domains. Designed for professional audio/video applications with support for multiple frame rates, tempo-based musical time, and display-linked transport timers.
+Support vocabulary for time in media apps: real time, SMPTE timecode, and musical bars and beats,
+with the conversions between them. The audio, video and metadata packages and both products'
+timelines build on it; nothing embeds it alone.
 
-## Overview
+It writes a position in whichever domain the user has chosen, parses typed timecode loosely, converts
+between frame rates, maps between time and pixels for rulers, waveforms and filmstrips, and runs a
+display-linked transport clock that follows playback rate changes. Timecode itself comes from
+[swift-timecode](https://github.com/orchetect/swift-timecode), which this package extends rather than
+replaces.
 
-SPFKTime provides three core capabilities:
+Frame-rate conversion offers both conventions the industry splits on, keeping the timecode values or
+keeping the real-time position, and the caller chooses which.
 
-- **Time Domains** — Unified handling of real time (seconds), SMPTE timecode, and musical time (bars/beats) with conversion between domains.
-- **Timecode Extensions** — Flexible timecode parsing, frame rate conversion, signed timecode, and CMTime interop built on top of [SwiftTimecode](https://github.com/orchetect/swift-timecode).
-- **High-Precision Timers** — Display-linked transport timers synced to screen refresh rate.
+Sample-level audio types belong in spfk-audio-base, tempo detection in spfk-tempo, and the views that
+draw a timeline in spfk-audio-ui and spfk-video-ui. This package says where things are, not what
+they look like.
 
-## Key Types
-
-### TimeFormatter
-
-The primary interface for managing time across domains. It wraps a `TimecodeDomain` and a
-`RealTimeDomain` together and produces the display string for whichever `primaryDomain` is active,
-so a UI switching between real time and timecode reads one property rather than branching.
-`TimeDomain` names the three — real time, timecode, bars — and carries a label for each.
-`TimeDisplayFormat` says how a value is written out.
-
-### TimecodeDomain
-
-Manages SMPTE timecode state — frame rate, start offset, current position — and vends `Timecode`
-values with consistent base settings. Frame-rate conversion offers both strategies the industry
-splits on: preserving the timecode values as Pro Tools does, or converting through the real-time
-position as Cubase does. `SignedTimecode` covers offset display, where a value can be negative.
-
-### Timecode Parsing
-
-Flexible string parsing across delimiter styles — colons, semicolons for drop-frame, periods — plus
-undelimited shorthand, where digits fill frames first and then assign right to left, so `11015`
-reads as `00:01:10:15` and `1:1` as `00:00:01:01`.
-
-### TransportTimer
-
-Display-linked playback timer bridging screen refresh to the audio sync domain via `AVAudioTime` /
-`mach_absolute_time`. Uses `CADisplayLink` on macOS 14+ with an automatic `CVDisplayLink` fallback
-on earlier systems. It reports `TransportTimerEvent` values — state changes, elapsed time and
-completion — and `TransportTimerPlayState` says whether the transport is running. Its position is a
-`TransportClock`: source seconds advancing at a playback rate from a start host time, with scheduled
-rate changes folding it where they are heard.
-
-### Musical Time
-
-Types for tempo-aware musical time representation, position tracking and visual rendering.
-
-| Type | Description |
-|------|-------------|
-| **`MusicalPulse`** | A note division — bar, quarter, eighth and the rest |
-| **`TimeSignature`** | Numerator and denominator |
-| **`MusicalMeasureDescription`** | Tempo and signature together — one bar's shape |
-| **`MusicalPulseDescription`** | A 1-based bar/beat/subdivision position, updated from a time |
-| **`VisualMusicalPulse`** | The pixel width of each division at a given zoom |
-| **`VisualMusicalTime`** | Zoom, tempo and signature combined, recomputing the pulse when any changes |
-
-## Timeline drawing
-
-`TimelineDrawable` is what a view conforms to in order to map between pixel coordinates and time —
-rulers, waveform displays, the video filmstrip. `TimelineRulerViewOptions` configures a ruler
-header, and `TimelineRulerDrawingScale` picks which divisions are legible at the current zoom.
-
-## CMTime utilities
-
-`CMTimeString` reads and writes the FCPXML `CMTime` form (`100/24s`), and builds one from a timecode
-or from seconds at a frame rate.
-
-## Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| [spfk-audio-base](https://github.com/ryanfrancesconi/spfk-audio-base) | Audio type definitions for timeline coordinates |
-| [spfk-base](https://github.com/ryanfrancesconi/spfk-base) | Foundation extensions, logging, error utilities |
-| [spfk-utils](https://github.com/ryanfrancesconi/spfk-utils) | String utilities, collection extensions |
-| [swift-timecode](https://github.com/orchetect/swift-timecode) | Core timecode types and frame rate definitions |
-| [spfk-testing](https://github.com/ryanfrancesconi/spfk-testing) | Test infrastructure (test target only) |
-
-## Requirements
-
-- **Platforms:** macOS 13+, iOS 16+
-- **Swift:** 6.2+
+The transport timer is macOS-only; everything else also builds for iOS.
 
 ## About
 
