@@ -1,27 +1,20 @@
 # SPFKTime
 
 [![Version](https://img.shields.io/github/v/tag/ryanfrancesconi/spfk-time)](https://github.com/ryanfrancesconi/spfk-time/tags)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-time%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ryanfrancesconi/spfk-time)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-time%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ryanfrancesconi/spfk-time)
+[![Swift](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-time%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ryanfrancesconi/spfk-time)
+[![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fryanfrancesconi%2Fspfk-time%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ryanfrancesconi/spfk-time)
 
-Support vocabulary for time in media apps: real time, SMPTE timecode, and musical bars and beats,
-with the conversions between them. The audio, video and metadata packages and both products'
-timelines build on it; nothing embeds it alone.
+Time for media apps: real time, SMPTE timecode, and musical bars and beats, with conversions
+between them. Timecode comes from [swift-timecode](https://github.com/orchetect/swift-timecode),
+which this package extends.
 
-It writes a position in whichever domain the user has chosen, parses typed timecode loosely, converts
-between frame rates, maps between time and pixels for rulers, waveforms and filmstrips, and runs a
-display-linked transport clock that follows playback rate changes. Timecode itself comes from
-[swift-timecode](https://github.com/orchetect/swift-timecode), which this package extends rather than
-replaces.
+## Features
 
-Frame-rate conversion offers both conventions the industry splits on, keeping the timecode values or
-keeping the real-time position, and the caller chooses which.
-
-Sample-level audio types belong in spfk-audio-base, tempo detection in spfk-tempo, and the views that
-draw a timeline in spfk-audio-ui and spfk-video-ui. This package says where things are, not what
-they look like.
-
-The transport timer is macOS-only; everything else also builds for iOS.
+- Format a position in real time, timecode or bars and beats
+- Loose parsing of typed timecode
+- Frame-rate conversion that either keeps the timecode values or keeps the real-time position
+- Time-to-pixel mapping for rulers and timelines
+- A display-linked transport timer that follows playback rate changes (macOS only)
 
 ## About
 
