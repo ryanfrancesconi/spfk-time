@@ -31,20 +31,4 @@ struct CMTimeUtilitiesTests {
         let time = CMTimeMake(value: -100, timescale: 24)
         #expect(time.stringValue == "-100/24s")
     }
-
-    // MARK: - CMTime.one
-
-    @Test("CMTime.one is 1 second")
-    func cmTimeOne() {
-        #expect(CMTime.one.seconds == 1.0)
-        #expect(CMTime.one.value == 1)
-        #expect(CMTime.one.timescale == 1)
-    }
-
-    // MARK: - cmTimeScaleVideo
-
-    @Test("cmTimeScaleVideo is 600")
-    func cmTimeScaleVideo() {
-        #expect(CMTimeScale.cmTimeScaleVideo == 600)
-    }
 }

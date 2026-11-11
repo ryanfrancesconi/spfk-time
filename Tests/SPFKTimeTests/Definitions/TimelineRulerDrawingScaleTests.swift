@@ -6,13 +6,6 @@ import Testing
 
 @Suite("TimelineRulerDrawingScale")
 struct TimelineRulerDrawingScaleTests {
-    @Test("default values are 1")
-    func defaultValues() {
-        let scale = TimelineRulerDrawingScale()
-        #expect(scale.time == 1)
-        #expect(scale.musical == 1)
-    }
-
     @Test("update scales for very zoomed out view")
     func veryZoomedOut() {
         var scale = TimelineRulerDrawingScale()

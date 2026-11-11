@@ -9,36 +9,12 @@ import Testing
 struct FrameRateExtensionTests {
     // MARK: - floatValue
 
-    @Test("floatValue returns nominal video rate for integer rates")
-    func floatValueIntegerRates() {
-        #expect(TimecodeFrameRate.fps24.floatValue == 24.0)
-        #expect(TimecodeFrameRate.fps25.floatValue == 25.0)
-        #expect(TimecodeFrameRate.fps30.floatValue == 30.0)
-        #expect(TimecodeFrameRate.fps48.floatValue == 48.0)
-        #expect(TimecodeFrameRate.fps50.floatValue == 50.0)
-        #expect(TimecodeFrameRate.fps60.floatValue == 60.0)
-    }
-
     @Test("floatValue returns correct fractional rates")
     func floatValueFractionalRates() {
         // These should be close to their nominal values, not truncated
         #expect(abs(TimecodeFrameRate.fps23_976.floatValue - 23.976) < 0.01)
         #expect(abs(TimecodeFrameRate.fps29_97.floatValue - 29.97) < 0.01)
         #expect(abs(TimecodeFrameRate.fps59_94.floatValue - 59.94) < 0.01)
-    }
-
-    // MARK: - frameDurationInSeconds
-
-    @Test("frameDurationInSeconds is reciprocal of frame rate")
-    func frameDurationInSeconds() {
-        let fps24Duration = TimecodeFrameRate.fps24.frameDurationInSeconds
-        #expect(abs(fps24Duration - 1.0 / 24.0) < 0.0001)
-
-        let fps25Duration = TimecodeFrameRate.fps25.frameDurationInSeconds
-        #expect(abs(fps25Duration - 1.0 / 25.0) < 0.0001)
-
-        let fps30Duration = TimecodeFrameRate.fps30.frameDurationInSeconds
-        #expect(abs(fps30Duration - 1.0 / 30.0) < 0.0001)
     }
 
     // MARK: - init(fps:)

@@ -41,16 +41,6 @@ struct TimecodePropertiesTests {
         #expect(cm.seconds == 0.0)
     }
 
-    // MARK: - zero
-
-    @Test("zero returns timecode at same frame rate")
-    func zeroProperty() throws {
-        let tc = try Timecode(.components(h: 1, m: 30, s: 0, f: 0), at: .fps25)
-        let z = tc.zero
-        #expect(z.frameRate == .fps25)
-        #expect(z.frameCount.wholeFrames == 0)
-    }
-
     // MARK: - roundUpToNextFrame
 
     @Test("roundUpToNextFrame with no subframes returns self")

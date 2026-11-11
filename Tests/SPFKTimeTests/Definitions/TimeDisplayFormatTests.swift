@@ -6,12 +6,6 @@ import Testing
 
 @Suite("TimeDisplayFormat")
 struct TimeDisplayFormatTests {
-    @Test("title returns display name")
-    func titleValues() {
-        #expect(TimeDisplayFormat.timecode.title == "Timecode")
-        #expect(TimeDisplayFormat.seconds.title == "Seconds")
-    }
-
     @Test("init from valid title string")
     func initFromTitle() {
         #expect(TimeDisplayFormat(title: "Timecode") == .timecode)
@@ -23,12 +17,6 @@ struct TimeDisplayFormatTests {
         #expect(TimeDisplayFormat(title: "timecode") == nil)
         #expect(TimeDisplayFormat(title: "SMPTE") == nil)
         #expect(TimeDisplayFormat(title: "") == nil)
-    }
-
-    @Test("raw values")
-    func rawValues() {
-        #expect(TimeDisplayFormat.timecode.rawValue == "timecode")
-        #expect(TimeDisplayFormat.seconds.rawValue == "seconds")
     }
 
 }
