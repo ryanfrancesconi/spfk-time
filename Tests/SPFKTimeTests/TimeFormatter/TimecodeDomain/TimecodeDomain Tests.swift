@@ -215,7 +215,7 @@ class TimecodeDomainTests {
     }
 
     /// NTSC drop frame drops frame *numbers* precisely so the count tracks wall clock, so a
-    /// timecode second there is a real second — unlike its non-drop twin, which runs 0.1% slow.
+    /// timecode second there is a real second - unlike its non-drop twin, which runs 0.1% slow.
     @Test func testNTSCDropFrameTracksWallClock() throws {
         for value in [TimecodeFrameRate.fps29_97d, .fps59_94d] {
             _ = td.setFrameRate(

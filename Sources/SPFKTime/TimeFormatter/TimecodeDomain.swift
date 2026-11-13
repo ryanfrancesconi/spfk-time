@@ -9,7 +9,7 @@ import SwiftTimecode
 /// and handles frame rate conversion with strategies matching Pro Tools (preserve values)
 /// and Cubase (convert values) behavior.
 ///
-/// Subframe resolution varies by DAW — Pro Tools uses 100, Logic Pro and Cubase use 80.
+/// Subframe resolution varies by DAW - Pro Tools uses 100, Logic Pro and Cubase use 80.
 /// Most DAWs limit to the SMPTE 24-hour clock (`00:00:00:00` … `23:59:59:XX`).
 public struct TimecodeDomain {
     // MARK: - Internal Properties

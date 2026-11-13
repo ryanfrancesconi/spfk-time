@@ -230,7 +230,7 @@
             timer.start(at: 0)
             timer.resume()
 
-            // Should not have sent a resume event — only start
+            // Should not have sent a resume event - only start
             #expect(mock.resumeCount == 1)
         }
 

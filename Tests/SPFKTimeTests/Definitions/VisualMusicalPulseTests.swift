@@ -42,7 +42,7 @@ struct VisualMusicalPulseTests {
     }
 
     /// Confirms that the quarter and bar snap grids produce distinct results for the same
-    /// input — guards against a future mapping swap between the two cases.
+    /// input - guards against a future mapping swap between the two cases.
     @Test func quarterAndBarProduceDifferentSnap() throws {
         let measure = MusicalMeasureDescription(timeSignature: ._4_4, bpm: Bpm(60)!)
         let vmp = try VisualMusicalPulse(pixelsPerSecond: 100, measure: measure)

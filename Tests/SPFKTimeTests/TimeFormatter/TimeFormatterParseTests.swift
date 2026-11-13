@@ -7,7 +7,7 @@ import Testing
 @testable import SPFKTime
 
 /// An editable readout formats in one domain and has to parse in the same one. Parsing real time
-/// while displaying timecode shows a value the user cannot type back — and with a start offset it
+/// while displaying timecode shows a value the user cannot type back - and with a start offset it
 /// is wrong by the offset as well.
 @Suite
 final class TimeFormatterParseTests {
@@ -110,7 +110,7 @@ final class TimeFormatterParseTests {
 
         #expect(timecode.elapsedTime(fromPrimaryString: "not a time") == nil)
 
-        // 45 frames does not exist at 30 fps — a position the file cannot hold is no position.
+        // 45 frames does not exist at 30 fps - a position the file cannot hold is no position.
         #expect(timecode.elapsedTime(fromPrimaryString: "00:00:01:45") == nil)
     }
 

@@ -7,7 +7,7 @@ import SPFKUtils
 import Testing
 
 struct VisualMusicalTimeTests {
-    /// visualPulse must be nil when bpm or timeSignature is absent — callers gate snap
+    /// visualPulse must be nil when bpm or timeSignature is absent - callers gate snap
     /// behavior on this being non-nil, so any change to the guard logic would break snapping.
     @Test func visualPulseNilWhenInputsMissing() {
         var vt = VisualMusicalTime()

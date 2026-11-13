@@ -126,7 +126,7 @@ extension TimeFormatter {
     ///
     /// The inverse of ``primaryString``, and it has to be: a readout that formats in one domain and
     /// parses in another shows a value the user cannot type back. In `.timecode` the string is an
-    /// absolute position, so the start offset comes back off — the exact opposite of what
+    /// absolute position, so the start offset comes back off - the exact opposite of what
     /// ``update(elapsedTime:)`` adds.
     ///
     /// A value before the timeline's zero parses to a negative, matching what the real-time domain
